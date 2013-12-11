@@ -1,16 +1,16 @@
 <?php
-
-$app = require('lib/base.php');
-$app->set('DEBUG', 1);
+$app = require('system/lib/base.php');
 if ((float)PCRE_VERSION < 7.9)
     trigger_error('PCRE version is out of date');
 
-$app->config('app/config/default/config.ini');
+$app->config('app/config/config.ini');
 
 $app->route('GET /',
     function ($app) {
+        $logger = new Log('error.log');
+        $logger->write('ttttttttttt');
 
-        $app->set('hello', 'Hello World');
+        $app->set('hello', 'Hello World!');
         echo View::instance()->render('default/index.htm');
     }
 );
