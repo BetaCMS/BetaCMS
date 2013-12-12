@@ -8,10 +8,17 @@ RewriteEngine On
 # containing this .htaccess file
 #
 # RewriteBase /
+# RewriteBase /betacms
 RewriteBase /betacms
 
 RewriteCond %{REQUEST_URI} \.ini$
 RewriteRule \.ini$ - [R=404]
+
+RewriteCond %{REQUEST_URI} app
+RewriteRule app - [R=404]
+
+RewriteCond %{REQUEST_URI} system
+RewriteRule system - [R=404]
 
 RewriteCond %{REQUEST_FILENAME} !-l
 RewriteCond %{REQUEST_FILENAME} !-f
