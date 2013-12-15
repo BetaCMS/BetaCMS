@@ -59,7 +59,7 @@ class Template extends View {
 			},
 			$str
 		);
-		return trim(preg_replace('/{{(.+?)}}/',trim('\1'),$str));
+		return trim(preg_replace('/\{\{(.+?)\}\}/s',trim('\1'),$str));
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Template extends View {
 		$out='';
 		foreach ($node['@attrib'] as $key=>$val)
 			$out.='$'.$key.'='.
-				(preg_match('/{{(.+?)}}/',$val)?
+				(preg_match('/\{\{(.+?)\}\}/',$val)?
 					$this->token($val):
 					Base::instance()->stringify($val)).'; ';
 		return '<?php '.$out.'?>';
@@ -88,7 +88,7 @@ class Template extends View {
 			'<?php '.(isset($attrib['if'])?
 				('if ('.$this->token($attrib['if']).') '):'').
 				('echo $this->render('.
-					(preg_match('/{{(.+?)}}/',$attrib['href'])?
+					(preg_match('/\{\{(.+?)\}\}/',$attrib['href'])?
 						$this->token($attrib['href']):
 						Base::instance()->stringify($attrib['href'])).','.
 					'$this->mime,get_defined_vars()); ?>');
@@ -217,7 +217,7 @@ class Template extends View {
 		$attrib=$node['@attrib'];
 		unset($node['@attrib']);
 		return
-			'<?php case '.(preg_match('/{{(.+?)}}/',$attrib['value'])?
+			'<?php case '.(preg_match('/\{\{(.+?)\}\}/',$attrib['value'])?
 				$this->token($attrib['value']):
 				Base::instance()->stringify($attrib['value'])).': ?>'.
 				$this->build($node).
@@ -247,16 +247,23 @@ class Template extends View {
 		if (is_string($node)) {
 			$self=$this;
 			return preg_replace_callback(
-				'/{{(.+?)}}/s',
+				'/\{\{(.+?)\}\}/s',
 				function($expr) use($self) {
 					$str=trim($self->token($expr[1]));
 					if (preg_match('/^(.+?)\h*\|\h*(raw|esc|format)$/',
 						$str,$parts))
-						$str='Base::instance()->'.$parts[2].
+						$str=(($parts[2]=='format')?
+							'\Base::instance()':'$this').'->'.$parts[2].
 							'('.$parts[1].')';
 					return '<?php echo '.$str.'; ?>';
 				},
-				$node
+				preg_replace_callback(
+					'/\{\{?~(.+?)~\}?\}/s',
+					function($expr) use($self) {
+						return '<?php '.$self->token($expr[1]).' ?>';
+					},
+					$node
+				)
 			);
 		}
 		$out='';
@@ -291,14 +298,34 @@ class Template extends View {
 	}
 
 	/**
+	*	Render template string
+	*	@return string
+	*	@param $str string
+	*	@param $hive array
+	**/
+	function resolve($str,array $hive=NULL) {
+		if (!$hive)
+			$hive=\Base::instance()->hive();
+		extract($hive);
+		ob_start();
+		eval(' ?>'.$this->build($str).'<?php ');
+		return ob_get_clean();
+	}
+
+	/**
 	*	Render template
 	*	@return string
 	*	@param $file string
 	*	@param $mime string
 	*	@param $hive array
+	*	@param $ttl int
 	**/
-	function render($file,$mime='text/html',array $hive=NULL) {
+	function render($file,$mime='text/html',array $hive=NULL,$ttl=0) {
 		$fw=Base::instance();
+		$cache=Cache::instance();
+		$cached=$cache->exists($hash=$fw->hash($file),$data);
+		if ($cached && $cached[0]+$ttl>microtime(TRUE))
+			return $data;
 		if (!is_dir($tmp=$fw->get('TEMP')))
 			mkdir($tmp,Base::MODE,TRUE);
 		foreach ($fw->split($fw->get('UI')) as $dir)
@@ -309,16 +336,18 @@ class Template extends View {
 					filemtime($this->view)<filemtime($view)) {
 					// Remove PHP code and comments
 					$text=preg_replace(
-						'/<\?(?:php)?.+?\?>|{{\*.+?\*}}/is','',
+						'/(?<!["\'])\h*<\?(?:php|\s*=).+?\?>\h*(?!["\'])|'.
+						'\{\{\*.+?\*\}\}|\{\*.+?\*\}/is','',
 						$fw->read($view));
 					// Build tree structure
 					for ($ptr=0,$len=strlen($text),
 						$tree=array(),$node=&$tree,
 						$stack=array(),$depth=0,$tmp='';$ptr<$len;)
 						if (preg_match('/^<(\/?)(?:F3:)?'.
-							'('.$this->tags.')\b'.
-							'((?:\h+\w+\h*=\h*(?:"(?:.+?)"|\'(?:.+?)\'))*)'.
-							'\h*(\/?)>/is',substr($text,$ptr),$match)) {
+							'('.$this->tags.')\b((?:\h+[\w-]+'.
+							'(?:\h*=\h*(?:"(?:.+?)"|\'(?:.+?)\'))?|'.
+							'\h*\{\{~?.+?~?\}\}|\h*\{~.+?~\})*)\h*(\/?)>/is',
+							substr($text,$ptr),$match)) {
 							if (strlen($tmp))
 								$node[]=$tmp;
 							// Element node
@@ -348,12 +377,17 @@ class Template extends View {
 								if ($match[3]) {
 									// Process attributes
 									preg_match_all(
-										'/\b([\w-]+)\h*=\h*'.
-										'(?:"(.+?)"|\'(.+?)\')/s',
+										'/(?:\b([\w-]+)'.
+										'(?:\h*=\h*(?:"(.+?)"|\'(.+?)\'))?|'.
+										'(\{\{.+?\}\}))/s',
 										$match[3],$attr,PREG_SET_ORDER);
 									foreach ($attr as $kv)
-										$node['@attrib'][$kv[1]]=
-											$kv[2]?:$kv[3];
+										if (isset($kv[4]))
+											$node['@attrib'][]=$kv[4];
+										else
+											$node['@attrib'][$kv[1]]=
+												(isset($kv[2])?$kv[2]:
+												(isset($kv[3])?$kv[3]:NULL));
 								}
 								if ($match[4])
 									// Empty tag
@@ -383,15 +417,22 @@ class Template extends View {
 				if (!$hive)
 					$hive=$fw->hive();
 				if ($fw->get('ESCAPE'))
-					$hive=$fw->esc($hive);
+					$hive=$this->esc($hive);
 				if (PHP_SAPI!='cli')
 					header('Content-Type: '.($this->mime=$mime).'; '.
 						'charset='.$fw->get('ENCODING'));
-				return $this->sandbox($hive);
+				$data=$this->sandbox($hive);
+				if ($ttl)
+					$cache->set($hash,$data);
+				return $data;
 			}
 		user_error(sprintf(Base::E_Open,$file));
 	}
 
+	/**
+	*	Class constructor
+	*	return object
+	**/
 	function __construct() {
 		$ref=new ReflectionClass(__CLASS__);
 		$this->tags='';

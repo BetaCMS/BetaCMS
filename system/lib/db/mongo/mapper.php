@@ -25,8 +25,8 @@ class Mapper extends \DB\Cursor {
 		$collection,
 		//! Mongo document
 		$document=array(),
-	    //! Mongo cursor
-	    $cursor;
+		//! Mongo cursor
+		$cursor;
 
 	/**
 	*	Return TRUE if field is defined
@@ -79,6 +79,8 @@ class Mapper extends \DB\Cursor {
 		foreach ($row as $key=>$val)
 			$mapper->document[$key]=$val;
 		$mapper->query=array(clone($mapper));
+		if (isset($mapper->trigger['load']))
+			\Base::instance()->call($mapper->trigger['load'],$mapper);
 		return $mapper;
 	}
 
@@ -206,6 +208,8 @@ class Mapper extends \DB\Cursor {
 	**/
 	function skip($ofs=1) {
 		$this->document=($out=parent::skip($ofs))?$out->document:array();
+		if ($this->document && isset($this->trigger['load']))
+			\Base::instance()->call($this->trigger['load'],$this);
 		return $out;
 	}
 
@@ -217,6 +221,10 @@ class Mapper extends \DB\Cursor {
 		if (isset($this->document['_id']))
 			return $this->update();
 		$this->collection->insert($this->document);
+		$pkey=array('_id'=>$this->document['_id']);
+		if (isset($this->trigger['insert']))
+			\Base::instance()->call($this->trigger['insert'],
+				array($this,$pkey));
 		return $this->document;
 	}
 
@@ -226,10 +234,13 @@ class Mapper extends \DB\Cursor {
 	**/
 	function update() {
 		$this->collection->update(
-			array('_id'=>$this->document['_id']),
+			$pkey=array('_id'=>$this->document['_id']),
 			$this->document,
 			array('upsert'=>TRUE)
 		);
+		if (isset($this->trigger['update']))
+			\Base::instance()->call($this->trigger['update'],
+				array($this,$pkey));
 		return $this->document;
 	}
 
@@ -241,10 +252,14 @@ class Mapper extends \DB\Cursor {
 	function erase($filter=NULL) {
 		if ($filter)
 			return $this->collection->remove($filter);
+		$pkey=array('_id'=>$this->document['_id']);
 		$result=$this->collection->
 			remove(array('_id'=>$this->document['_id']));
 		parent::erase();
 		$this->skip(0);
+		if (isset($this->trigger['erase']))
+			\Base::instance()->call($this->trigger['erase'],
+				array($this,$pkey));
 		return $result;
 	}
 
@@ -261,9 +276,13 @@ class Mapper extends \DB\Cursor {
 	*	Hydrate mapper object using hive array variable
 	*	@return NULL
 	*	@param $key string
+	*	@param $func callback
 	**/
-	function copyfrom($key) {
-		foreach (\Base::instance()->get($key) as $key=>$val)
+	function copyfrom($key,$func=NULL) {
+		$var=\Base::instance()->get($key);
+		if ($func)
+			$var=$func($var);
+		foreach ($var as $key=>$val)
 			$this->document[$key]=$val;
 	}
 
@@ -277,13 +296,21 @@ class Mapper extends \DB\Cursor {
 		foreach ($this->document as $key=>$field)
 			$var[$key]=$field;
 	}
-	
+
 	/**
-	 * Get the cursor from the last query
-	 * @return MongoCursor|NULL 
-	 */
+	*	Return field names
+	*	@return array
+	**/
+	function fields() {
+		return array_keys($this->document);
+	}
+
+	/**
+	*	Return the cursor from last query
+	*	@return object|NULL
+	**/
 	function cursor() {
-        return $this->cursor;
+		return $this->cursor;
 	}
 
 	/**

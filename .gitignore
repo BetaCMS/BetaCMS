@@ -1,1 +1,4 @@
 .idea
+*.log
+usr/
+app/logs/
