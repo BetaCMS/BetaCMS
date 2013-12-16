@@ -247,6 +247,10 @@ final class Base {
 		if (preg_match('/^JAR\b/',$key))
 			call_user_func_array(
 				'session_set_cookie_params',$this->hive['JAR']);
+		elseif (preg_match('/^SESSION\b/',$key)) {
+			session_commit();
+			session_start();
+		}
 		$cache=Cache::instance();
 		if ($cache->exists($hash=$this->hash($key).'.var') || $ttl)
 			// Persist the key-value pair
@@ -325,6 +329,10 @@ final class Base {
 					$out.='['.$this->stringify($part).']';
 			// PHP can't unset a referenced variable
 			eval('unset($this->hive'.$out.');');
+			if ($parts[0]=='SESSION') {
+				session_commit();
+				session_start();
+			}
 			if ($cache->exists($hash=$this->hash($key).'.var'))
 				// Remove from cache
 				$cache->clear($hash);
@@ -1499,7 +1507,9 @@ final class Base {
 		$scheme=isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on' ||
 			isset($headers['X-Forwarded-Proto']) &&
 			$headers['X-Forwarded-Proto']=='https'?'https':'http';
-		$base=preg_replace('/\/[^\/]+$/','',$_SERVER['SCRIPT_NAME']);
+		$base='';
+		if (PHP_SAPI!='cli')
+			$base=preg_replace('/\/[^\/]+$/','',$_SERVER['SCRIPT_NAME']);
 		preg_match('/'.preg_quote($base,'/').'(.*)/',
 			parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH),$path);
 		call_user_func_array('session_set_cookie_params',
@@ -1578,7 +1588,7 @@ final class Base {
 			'SERIALIZER'=>extension_loaded($ext='igbinary')?$ext:'php',
 			'TEMP'=>'tmp/',
 			'TIME'=>microtime(TRUE),
-			'TZ'=>@date_default_timezone_get('date.timezone')?:'UTC',
+			'TZ'=>(@ini_get('date.timezone'))?:'UTC',
 			'UI'=>'./',
 			'UNLOAD'=>NULL,
 			'UPLOADS'=>'./',
@@ -1862,9 +1872,7 @@ class View extends Prefab {
 
 	protected
 		//! Template file
-		$view,
-		//! Local hive
-		$hive;
+		$view;
 
 	/**
 	*	Attempt to clone object
@@ -1931,9 +1939,17 @@ class View extends Prefab {
 	/**
 	*	Create sandbox for template execution
 	*	@return string
+	*	@param $hive array
 	**/
-	protected function sandbox($hive) {
+	protected function sandbox(array $hive=NULL) {
+		$fw=Base::instance();
+		if (!$hive)
+			$hive=$fw->hive();
+		if ($fw->get('ESCAPE'))
+			$hive=$this->esc($hive);
 		extract($hive);
+		unset($fw);
+		unset($hive);
 		ob_start();
 		require($this->view);
 		return ob_get_clean();
@@ -1953,15 +1969,11 @@ class View extends Prefab {
 		$cached=$cache->exists($hash=$fw->hash($file),$data);
 		if ($cached && $cached[0]+$ttl>microtime(TRUE))
 			return $data;
-		foreach ($fw->split($fw->get('UI').';./') as $dir){
+		foreach ($fw->split($fw->get('UI').';./') as $dir)
 			if (is_file($this->view=$fw->fixslashes($dir.$file))) {
 				if (isset($_COOKIE[session_name()]))
 					@session_start();
 				$fw->sync('SESSION');
-				if (!$hive)
-					$hive=$fw->hive();
-				if ($fw->get('ESCAPE'))
-					$hive=$this->esc($hive);
 				if (PHP_SAPI!='cli')
 					header('Content-Type: '.$mime.'; '.
 						'charset='.$fw->get('ENCODING'));
@@ -1970,7 +1982,136 @@ class View extends Prefab {
 					$cache->set($hash,$data);
 				return $data;
 			}
-        }
+		user_error(sprintf(Base::E_Open,$file));
+	}
+
+}
+
+//! Lightweight template engine
+class Preview extends View {
+
+	protected
+		//! MIME type
+		$mime;
+
+	/**
+	*	Convert token to variable
+	*	@return string
+	*	@param $str string
+	**/
+	function token($str) {
+		$self=$this;
+		$str=preg_replace_callback(
+			'/(?<!\w)@(\w(?:[\w\.\[\]]|\->|::)*)/',
+			function($var) use($self) {
+				// Convert from JS dot notation to PHP array notation
+				return '$'.preg_replace_callback(
+					'/(\.\w+)|\[((?:[^\[\]]*|(?R))*)\]/',
+					function($expr) use($self) {
+						$fw=Base::instance();
+						return
+							'['.
+							($expr[1]?
+								$fw->stringify(substr($expr[1],1)):
+								(preg_match('/^\w+/',
+									$mix=$self->token($expr[2]))?
+									$fw->stringify($mix):
+									$mix)).
+							']';
+					},
+					$var[1]
+				);
+			},
+			$str
+		);
+		return trim(preg_replace('/\{\{(.+?)\}\}/s',trim('\1'),$str));
+	}
+
+	/**
+	*	Assemble markup
+	*	@return string
+	*	@param $node string
+	**/
+	protected function build($node) {
+		$self=$this;
+		return preg_replace_callback(
+			'/\{\{(.+?)\}\}/s',
+			function($expr) use($self) {
+				$str=trim($self->token($expr[1]));
+				if (preg_match('/^(.+?)\h*\|\h*(raw|esc|format)$/',
+					$str,$parts))
+					$str=(($parts[2]=='format')?
+						'\Base::instance()':'$this').'->'.$parts[2].
+						'('.$parts[1].')';
+				return '<?php echo '.$str.'; ?>';
+			},
+			preg_replace_callback(
+				'/\{\{?~(.+?)~\}?\}/s',
+				function($expr) use($self) {
+					return '<?php '.$self->token($expr[1]).' ?>';
+				},
+				$node
+			)
+		);
+	}
+
+	/**
+	*	Render template string
+	*	@return string
+	*	@param $str string
+	*	@param $hive array
+	**/
+	function resolve($str,array $hive=NULL) {
+		if (!$hive)
+			$hive=\Base::instance()->hive();
+		extract($hive);
+		ob_start();
+		eval(' ?>'.$this->build($str).'<?php ');
+		return ob_get_clean();
+	}
+
+	/**
+	*	Render template
+	*	@return string
+	*	@param $file string
+	*	@param $mime string
+	*	@param $hive array
+	*	@param $ttl int
+	**/
+	function render($file,$mime='text/html',array $hive=NULL,$ttl=0) {
+		$fw=Base::instance();
+		$cache=Cache::instance();
+		$cached=$cache->exists($hash=$fw->hash($file),$data);
+		if ($cached && $cached[0]+$ttl>microtime(TRUE))
+			return $data;
+		if (!is_dir($tmp=$fw->get('TEMP')))
+			mkdir($tmp,Base::MODE,TRUE);
+		foreach ($fw->split($fw->get('UI')) as $dir)
+			if (is_file($view=$fw->fixslashes($dir.$file))) {
+				if (!is_file($this->view=($tmp.
+					$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
+					$fw->hash($view).'.php')) ||
+					filemtime($this->view)<filemtime($view)) {
+					// Remove PHP code and comments
+					$text=preg_replace(
+						'/(?<!["\'])\h*<\?(?:php|\s*=).+?\?>\h*(?!["\'])|'.
+						'\{\{\*.+?\*\}\}|\{\*.+?\*\}/is','',
+						$fw->read($view));
+					if (method_exists($this,'parse'))
+						$text=$this->parse($text);
+					$fw->write($this->view,$this->build($text));
+				}
+				if (isset($_COOKIE[session_name()]))
+					@session_start();
+				$fw->sync('SESSION');
+				if (PHP_SAPI!='cli')
+					header('Content-Type: '.($this->mime=$mime).'; '.
+						'charset='.$fw->get('ENCODING'));
+				$data=$this->sandbox($hive);
+				if ($ttl)
+					$cache->set($hash,$data);
+				return $data;
+			}
 		user_error(sprintf(Base::E_Open,$file));
 	}
 

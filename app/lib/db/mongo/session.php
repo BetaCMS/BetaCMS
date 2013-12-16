@@ -13,9 +13,9 @@
 	Please see the license.txt file for more information.
 */
 
-namespace DB\Jig;
+namespace DB\Mongo;
 
-//! Jig-managed session handler
+//! MongoDB-managed session handler
 class Session extends Mapper {
 
 	/**
@@ -42,7 +42,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function read($id) {
-		$this->load(array('@session_id=?',$id));
+		$this->load(array('session_id'=>$id));
 		return $this->dry()?FALSE:$this->get('data');
 	}
 
@@ -54,22 +54,25 @@ class Session extends Mapper {
 	**/
 	function write($id,$data) {
 		$fw=\Base::instance();
+		$sent=headers_sent();
 		$headers=$fw->get('HEADERS');
-		$this->load(array('@session_id=?',$id));
+		$this->load(array('session_id'=>$id));
 		$csrf=$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
 			$fw->hash(mt_rand());
-		$error=$fw->get('ERROR');
 		$this->set('session_id',$id);
 		$this->set('data',$data);
-		$this->set('csrf',$error?$this->csrf():$csrf);
+		$this->set('csrf',$sent?$this->csrf():$csrf);
 		$this->set('ip',$fw->get('IP'));
 		$this->set('agent',
 			isset($headers['User-Agent'])?$headers['User-Agent']:'');
 		$this->set('stamp',time());
 		$this->save();
-		if (!$error)
-			call_user_func_array('setcookie',array('_',$csrf)+
-				session_get_cookie_params());
+		if (!$sent) {
+			if ($_COOKIE['_'])
+				setcookie('_','',strtotime('-1 year'));
+			call_user_func_array('setcookie',
+				array('_',$csrf)+$fw->get('JAR'));
+		}
 		return TRUE;
 	}
 
@@ -79,7 +82,10 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function destroy($id) {
-		$this->erase(array('@session_id=?',$id));
+		$this->erase(array('session_id'=>$id));
+		setcookie(session_name(),'',strtotime('-1 year'));
+		unset($_COOKIE[session_name()]);
+		header_remove('Set-Cookie');
 		return TRUE;
 	}
 
@@ -89,7 +95,7 @@ class Session extends Mapper {
 	*	@param $max int
 	**/
 	function cleanup($max) {
-		$this->erase(array('@stamp+?<?',$max,time()));
+		$this->erase(array('$where'=>'this.stamp+'.$max.'<'.time()));
 		return TRUE;
 	}
 
@@ -99,7 +105,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function csrf($id=NULL) {
-		$this->load(array('@session_id=?',$id?:session_id()));
+		$this->load(array('session_id'=>$id?:session_id()));
 		return $this->dry()?FALSE:$this->get('csrf');
 	}
 
@@ -109,7 +115,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function ip($id=NULL) {
-		$this->load(array('@session_id=?',$id?:session_id()));
+		$this->load(array('session_id'=>$id?:session_id()));
 		return $this->dry()?FALSE:$this->get('ip');
 	}
 
@@ -119,7 +125,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function stamp($id=NULL) {
-		$this->load(array('@session_id=?',$id?:session_id()));
+		$this->load(array('session_id'=>$id?:session_id()));
 		return $this->dry()?FALSE:$this->get('stamp');
 	}
 
@@ -129,7 +135,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function agent($id=NULL) {
-		$this->load(array('@session_id=?',$id?:session_id()));
+		$this->load(array('session_id'=>$id?:session_id()));
 		return $this->dry()?FALSE:$this->get('agent');
 	}
 
@@ -138,8 +144,8 @@ class Session extends Mapper {
 	*	@param $db object
 	*	@param $table string
 	**/
-	function __construct(\DB\Jig $db,$table='sessions') {
-		parent::__construct($db,'sessions');
+	function __construct(\DB\Mongo $db,$table='sessions') {
+		parent::__construct($db,$table);
 		session_set_save_handler(
 			array($this,'open'),
 			array($this,'close'),
@@ -164,6 +170,14 @@ class Session extends Mapper {
 			unset($_COOKIE['_']);
 			session_destroy();
 			\Base::instance()->error(403);
+		}
+		$csrf=$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
+			$fw->hash(mt_rand());
+		if ($this->load(array('session_id'=>session_id()))) {
+			$this->set('csrf',$csrf);
+			$this->save();
+			call_user_func_array('setcookie',
+				array('_',$csrf)+$fw->get('JAR'));
 		}
 	}
 

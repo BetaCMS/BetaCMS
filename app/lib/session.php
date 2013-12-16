@@ -13,10 +13,8 @@
 	Please see the license.txt file for more information.
 */
 
-namespace DB\SQL;
-
-//! SQL-managed session handler
-class Session extends Mapper {
+//! Cache-based session handler
+class Session {
 
 	/**
 	*	Open session
@@ -42,8 +40,7 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function read($id) {
-		$this->load(array('session_id=?',$id));
-		return $this->dry()?FALSE:$this->get('data');
+		return Cache::instance()->exists($id.'.@',$data)?$data['data']:FALSE;
 	}
 
 	/**
@@ -53,23 +50,28 @@ class Session extends Mapper {
 	*	@param $data string
 	**/
 	function write($id,$data) {
-		$fw=\Base::instance();
+		$fw=Base::instance();
+		$sent=headers_sent();
 		$headers=$fw->get('HEADERS');
-		$this->load(array('session_id=?',$id));
 		$csrf=$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
 			$fw->hash(mt_rand());
-		$error=$fw->get('ERROR');
-		$this->set('session_id',$id);
-		$this->set('data',$data);
-		$this->set('csrf',$error?$this->csrf():$csrf);
-		$this->set('ip',$fw->get('IP'));
-		$this->set('agent',
-			isset($headers['User-Agent'])?$headers['User-Agent']:'');
-		$this->set('stamp',time());
-		$this->save();
-		if (!$error)
-			call_user_func_array('setcookie',array('_',$csrf)+
-				session_get_cookie_params());
+		$jar=$fw->get('JAR');
+		Cache::instance()->set($id.'.@',
+			array(
+				'data'=>$data,
+				'csrf'=>$sent?$this->csrf():$csrf,
+				'ip'=>$fw->get('IP'),
+				'agent'=>isset($headers['User-Agent'])?
+					$headers['User-Agent']:'',
+				'stamp'=>time()
+			),
+			$jar['expire']?($jar['expire']-time()):0
+		);
+		if (!$sent) {
+			if ($_COOKIE['_'])
+				setcookie('_','',strtotime('-1 year'));
+			call_user_func_array('setcookie',array('_',$csrf)+$jar);
+		}
 		return TRUE;
 	}
 
@@ -79,7 +81,10 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function destroy($id) {
-		$this->erase(array('session_id=?',$id));
+		Cache::instance()->clear($id.'.@');
+		setcookie(session_name(),'',strtotime('-1 year'));
+		unset($_COOKIE[session_name()]);
+		header_remove('Set-Cookie');
 		return TRUE;
 	}
 
@@ -89,7 +94,7 @@ class Session extends Mapper {
 	*	@param $max int
 	**/
 	function cleanup($max) {
-		$this->erase(array('stamp+?<?',$max,time()));
+		Cache::instance()->reset('.@',$max);
 		return TRUE;
 	}
 
@@ -99,8 +104,8 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function csrf($id=NULL) {
-		$this->load(array('session_id=?',$id?:session_id()));
-		return $this->dry()?FALSE:$this->get('csrf');
+		return Cache::instance()->exists(($id?:session_id()).'.@',$data)?
+			$data['csrf']:FALSE;
 	}
 
 	/**
@@ -109,8 +114,8 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function ip($id=NULL) {
-		$this->load(array('session_id=?',$id?:session_id()));
-		return $this->dry()?FALSE:$this->get('ip');
+		return Cache::instance()->exists(($id?:session_id()).'.@',$data)?
+			$data['ip']:FALSE;
 	}
 
 	/**
@@ -119,8 +124,8 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function stamp($id=NULL) {
-		$this->load(array('session_id=?',$id?:session_id()));
-		return $this->dry()?FALSE:$this->get('stamp');
+		return Cache::instance()->exists(($id?:session_id()).'.@',$data)?
+			$data['stamp']:FALSE;
 	}
 
 	/**
@@ -129,34 +134,15 @@ class Session extends Mapper {
 	*	@param $id string
 	**/
 	function agent($id=NULL) {
-		$this->load(array('session_id=?',$id?:session_id()));
-		return $this->dry()?FALSE:$this->get('agent');
+		return Cache::instance()->exists(($id?:session_id()).'.@',$data)?
+			$data['agent']:FALSE;
 	}
 
 	/**
 	*	Instantiate class
-	*	@param $db object
-	*	@param $table string
+	*	@return object
 	**/
-	function __construct(\DB\SQL $db,$table='sessions') {
-		$db->exec(
-			(preg_match('/mssql|sqlsrv|sybase/',$db->driver())?
-				('IF NOT EXISTS (SELECT * FROM sysobjects WHERE '.
-					'name='.$db->quote($table).' AND xtype=\'U\') '.
-					'CREATE TABLE dbo.'):
-				('CREATE TABLE IF NOT EXISTS '.
-					(($name=$db->name())?($name.'.'):''))).
-			$table.' ('.
-				'session_id VARCHAR(40),'.
-				'data TEXT,'.
-				'csrf TEXT,'.
-				'ip VARCHAR(40),'.
-				'agent VARCHAR(255),'.
-				'stamp INTEGER,'.
-				'PRIMARY KEY(session_id)'.
-			');'
-		);
-		parent::__construct($db,$table);
+	function __construct() {
 		session_set_save_handler(
 			array($this,'open'),
 			array($this,'close'),
@@ -181,6 +167,17 @@ class Session extends Mapper {
 			unset($_COOKIE['_']);
 			session_destroy();
 			\Base::instance()->error(403);
+		}
+		$csrf=$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
+			$fw->hash(mt_rand());
+		$jar=$fw->get('JAR');
+		if (Cache::instance()->exists($id=session_id().'.@',$data)) {
+			$data['csrf']=$csrf;
+			Cache::instance()->set($id.'.@',
+				$data,
+				$jar['expire']?($jar['expire']-time()):0
+			);
+			call_user_func_array('setcookie',array('_',$csrf)+$jar);
 		}
 	}
 

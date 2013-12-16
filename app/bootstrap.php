@@ -1,10 +1,9 @@
 <?php
 namespace application;
-use controllers\Index;
 
 define('ROOT', realpath('../'));
 
-$app = require_once(ROOT . '/system/lib/base.php');
+$app = require_once('lib/base.php');
 
 // read config and overrides
 // @see http://fatfreeframework.com/framework-variables#configuration-files
@@ -14,7 +13,7 @@ if (file_exists('config/config.ini'))
 
 // setup class autoloader
 // @see http://fatfreeframework.com/quick-reference#autoload
-$app->set('AUTOLOAD', __dir__.'/;');
+$app->set('AUTOLOAD', __dir__ . '/;');
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
@@ -49,7 +48,7 @@ if ($app->get('db.driver') == 'sqlite') {
 
     $dsn = $app->get('db.dsn');
     $dfile = ROOT . '/' . $usr . substr($dsn, strpos($dsn, '/'));
-    if(!file_exists($dfile)){
+    if (!file_exists($dfile)) {
         die("<h1>无数据库!</h1>");
     }
     $dsn = substr($dsn, 0, strpos($dsn, '/')) . $dfile;
@@ -105,8 +104,9 @@ if (!$app->exists('SESSION.notifications')) {
 // firstly load routes from ini file
 //$app->config('config/routes.ini');
 $app->route('GET /','controllers\Index->index');
+
 // object mode
-$app->route('GET /@controller/@action','controllers\@controller->@action');
+$app->route('GET /@controller/@action', 'controllers\@controller->@action');
 
 
 $app->run();
