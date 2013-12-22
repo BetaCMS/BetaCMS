@@ -1,11 +1,10 @@
 <?php
-namespace controllers;
 /**
  * Base Controller Class
  *
  */
 
-abstract class Base extends \Prefab
+abstract class Controller extends \Prefab
 {
 
     /**

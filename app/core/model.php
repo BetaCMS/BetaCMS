@@ -1,17 +1,15 @@
 <?php
-namespace models;
+
 /**
  * Base Model Class
- *
  */
 
-abstract class Base extends \Prefab
-{
+abstract class Model extends \Prefab {
 
     /**
-     * instance
+     * app instance
      *
-     * @var $app
+     * @var app
      */
     protected $app;
 
@@ -23,7 +21,7 @@ abstract class Base extends \Prefab
     protected $db;
 
     /**
-     * logger instance
+     * f3 logger instance
      *
      * @var logger
      */
@@ -31,9 +29,9 @@ abstract class Base extends \Prefab
 
     /**
      * initialize model
+     *
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->app = \Base::instance();
         $this->db = \Registry::get('db');
         $this->logger = \Registry::get('logger');

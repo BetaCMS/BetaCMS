@@ -13,7 +13,7 @@ if (file_exists('config/config.ini'))
 
 // setup class autoloader
 // @see http://fatfreeframework.com/quick-reference#autoload
-$app->set('AUTOLOAD', __dir__ . '/;');
+$app->set('AUTOLOAD', 'controllers/|models/|core/');
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
@@ -103,10 +103,12 @@ if (!$app->exists('SESSION.notifications')) {
 // @see http://fatfreeframework.com/routing-engine
 // firstly load routes from ini file
 //$app->config('config/routes.ini');
-$app->route('GET /','controllers\Index->index');
+$app->route('GET /','Index->index');
 
 // object mode
 $app->route('GET /@controller/@action', 'controllers\@controller->@action');
+
+
 
 
 $app->run();

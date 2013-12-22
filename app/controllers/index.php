@@ -1,10 +1,9 @@
 <?php
-namespace controllers;
 /**
  * Index Controller Class
  */
 
-class Index extends Base
+class Index extends Controller
 {
 
     public function __construct()
@@ -14,8 +13,7 @@ class Index extends Base
 
     public function index($app, $params)
     {
-       \models\Index::instance()->index();
-
+        User::instance()->index();
 
         echo \View::instance()->render('default/index.htm');
     }

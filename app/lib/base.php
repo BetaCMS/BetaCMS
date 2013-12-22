@@ -19,7 +19,7 @@ final class Base {
 	//@{ Framework details
 	const
 		PACKAGE='Fat-Free Framework',
-		VERSION='3.2.0-Dev';
+		VERSION='3.2.1-Dev';
 	//@}
 
 	//@{ HTTP status codes (RFC 2616)
@@ -85,9 +85,11 @@ final class Base {
 	//@{ Error messages
 	const
 		E_Pattern='Invalid routing pattern: %s',
+		E_Named='Named route does not exist: %s',
 		E_Fatal='Fatal error: %s',
 		E_Open='Unable to open %s',
 		E_Routes='No routes specified',
+		E_Class='Invalid class %s',
 		E_Method='Invalid method %s',
 		E_Hive='Invalid hive key %s';
 	//@}
@@ -123,6 +125,32 @@ final class Base {
 	private function cut($key) {
 		return preg_split('/\[\h*[\'"]?(.+?)[\'"]?\h*\]|(->)|\./',
 			$key,NULL,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+	}
+
+	/**
+	*	Replace tokenized URL with current route's token values
+	*	@return string
+	*	@param $url string
+	**/
+	function build($url) {
+		if (preg_match_all('/@(\w+)/',$url,$matches,PREG_SET_ORDER))
+			foreach ($matches as $match)
+				if (array_key_exists($match[1],$this->hive['PARAMS']))
+					$url=str_replace($match[0],
+						$this->hive['PARAMS'][$match[1]],$url);
+		return $url;
+	}
+
+	/**
+	*	Parse string containing key-value pairs and use as routing tokens
+	*	@return NULL
+	*	@param $str string
+	**/
+	function parse($str) {
+		preg_match_all('/(\w+)\h*=\h*(.+?)(?=,|$)/',
+			$str,$pairs,PREG_SET_ORDER);
+		foreach ($pairs as $pair)
+			$this->hive['PARAMS'][$pair[1]]=trim($pair[2]);
 	}
 
 	/**
@@ -169,6 +197,8 @@ final class Base {
 				$var=$var[$part];
 			else
 				return $this->null;
+		if ($parts[0]=='ALIASES')
+			$var=$this->build($var);
 		return $var;
 	}
 
@@ -840,7 +870,10 @@ final class Base {
 	**/
 	function expire($secs=0) {
 		if (PHP_SAPI!='cli') {
+			header('X-Content-Type-Options: nosniff');
+			header('X-Frame-Options: SAMEORIGIN');
 			header('X-Powered-By: '.$this->hive['PACKAGE']);
+			header('X-XSS-Protection: 1; mode=block');
 			if ($secs) {
 				$time=microtime(TRUE);
 				header_remove('Pragma');
@@ -951,12 +984,22 @@ final class Base {
 	**/
 	function mock($pattern,array $args=NULL,array $headers=NULL,$body=NULL) {
 		$types=array('sync','ajax');
-		preg_match('/([\|\w]+)\h+([^\h]+)'.
+		preg_match('/([\|\w]+)\h+(?:@(\w+)(?:(\(.+?)\))*|([^\h]+))'.
 			'(?:\h+\[('.implode('|',$types).')\])?/',$pattern,$parts);
-		if (empty($parts[2]))
-			user_error(sprintf(self::E_Pattern,$pattern));
 		$verb=strtoupper($parts[1]);
-		$url=parse_url($parts[2]);
+		if ($parts[2]) {
+			if (empty($this->hive['ALIASES'][$parts[2]])) {
+				var_dump($parts);
+				user_error(sprintf(self::E_Named,$parts[2]));
+			}
+			$parts[4]=$this->hive['ALIASES'][$parts[2]];
+			if (isset($parts[3]))
+				$this->parse($parts[3]);
+			$parts[4]=$this->build($parts[4]);
+		}
+		if (empty($parts[4]))
+			user_error(sprintf(self::E_Pattern,$pattern));
+		$url=parse_url($parts[4]);
 		$query='';
 		if ($args)
 			$query.=http_build_query($args);
@@ -969,8 +1012,8 @@ final class Base {
 			$_SERVER['HTTP_'.str_replace('-','_',strtoupper($key))]=$val;
 		$this->hive['VERB']=$verb;
 		$this->hive['URI']=$this->hive['BASE'].$url['path'];
-		$this->hive['AJAX']=isset($parts[3]) &&
-			preg_match('/ajax/i',$parts[3]);
+		$this->hive['AJAX']=isset($parts[5]) &&
+			preg_match('/ajax/i',$parts[5]);
 		if (preg_match('/GET|HEAD/',$verb) && $query)
 			$this->hive['URI'].='?'.$query;
 		else
@@ -993,17 +1036,24 @@ final class Base {
 				$this->route($item,$handler,$ttl,$kbps);
 			return;
 		}
-		preg_match('/([\|\w]+)\h+([^\h]+)'.
+		preg_match('/([\|\w]+)\h+(?:(?:@(\w+)\h*:\h*)?([^\h]+)|@(\w+))'.
 			'(?:\h+\[('.implode('|',$types).')\])?/',$pattern,$parts);
-		if (empty($parts[2]))
+		if ($parts[2])
+			$this->hive['ALIASES'][$parts[2]]=$parts[3];
+		elseif (!empty($parts[4])) {
+			if (empty($this->hive['ALIASES'][$parts[4]]))
+				user_error(sprintf(self::E_Named,$parts[4]));
+			$parts[3]=$this->hive['ALIASES'][$parts[4]];
+		}
+		if (empty($parts[3]))
 			user_error(sprintf(self::E_Pattern,$pattern));
-		$type=empty($parts[3])?
+		$type=empty($parts[5])?
 			self::REQ_SYNC|self::REQ_AJAX:
-			constant('self::REQ_'.strtoupper($parts[3]));
+			constant('self::REQ_'.strtoupper($parts[5]));
 		foreach ($this->split($parts[1]) as $verb) {
 			if (!preg_match('/'.self::VERBS.'/',$verb))
 				$this->error(501,$verb.' '.$this->hive['URI']);
-			$this->hive['ROUTES'][str_replace('@',"\x00".'@',$parts[2])]
+			$this->hive['ROUTES'][str_replace('@',"\x00".'@',$parts[3])]
 				[$type][strtoupper($verb)]=array($handler,$ttl,$kbps);
 		}
 	}
@@ -1011,18 +1061,31 @@ final class Base {
 	/**
 	*	Reroute to specified URI
 	*	@return NULL
-	*	@param $uri string
+	*	@param $url string
 	*	@param $permanent bool
 	**/
-	function reroute($uri,$permanent=FALSE) {
+	function reroute($url,$permanent=FALSE) {
 		if (PHP_SAPI!='cli') {
-			header('Location: '.(preg_match('/^https?:\/\//',$uri)?
-				$uri:($this->hive['BASE'].$uri)));
+			if (preg_match('/^(?:@(\w+)(?:(\(.+?)\))*|https?:\/\/)/',
+				$url,$parts)) {
+				if (isset($parts[1])) {
+					if (empty($this->hive['ALIASES'][$parts[1]]))
+						user_error(sprintf(self::E_Named,$parts[1]));
+					$url=$this->hive['BASE'].
+						$this->hive['ALIASES'][$parts[1]];
+					if (isset($parts[2]))
+						$this->parse($parts[2]);
+					$url=$this->build($url);
+				}
+			}
+			else
+				$url=$this->hive['BASE'].$url;
+			header('Location: '.$url);
 			$this->status($permanent?
 				301:($_SERVER['SERVER_PROTOCOL']<'HTTP/1.1'?302:303));
 			die;
 		}
-		$this->mock('GET '.$uri);
+		$this->mock('GET '.$url);
 	}
 
 	/**
@@ -1154,6 +1217,8 @@ final class Base {
 				else
 					$this->expire(0);
 				if (!strlen($body)) {
+					if (!$this->hive['RAW'])
+						$this->hive['BODY']=file_get_contents('php://input');
 					ob_start();
 					// Call route handler
 					$this->call($handler,array($this,$args),
@@ -1210,16 +1275,16 @@ final class Base {
 			preg_match('/(.+)\h*(->|::)\h*(.+)/s',$func,$parts)) {
 			// Convert string to executable PHP callback
 			if (!class_exists($parts[1]))
-				$this->error(404);
+				$this->error(500,sprintf(self::E_Class,$parts[1]));
 			if ($parts[2]=='->')
 				$parts[1]=is_subclass_of($parts[1],'Prefab')?
 					call_user_func($parts[1].'::instance'):
-					new $parts[1];
+					new $parts[1]($this);
 			$func=array($parts[1],$parts[3]);
 		}
 		if (!is_callable($func) && $hooks=='beforeroute,afterroute')
 			// No route handler
-			$this->error(404);
+			$this->error(500,sprintf(self::E_Method,$parts[0]));
 		$obj=FALSE;
 		if (is_array($func)) {
 			$hooks=$this->split($hooks);
@@ -1420,11 +1485,11 @@ final class Base {
 	protected function autoload($class) {
 		$class=$this->fixslashes(ltrim($class,'\\'));
 		foreach ($this->split($this->hive['PLUGINS'].';'.
-			$this->hive['AUTOLOAD']) as $auto)
+			$this->hive['AUTOLOAD']) as $auto){
 			if (is_file($file=$auto.$class.'.php') ||
 				is_file($file=$auto.strtolower($class).'.php') ||
 				is_file($file=strtolower($auto.$class).'.php'))
-				return require($file);
+				return require($file);}
 	}
 
 	/**
@@ -1509,9 +1574,9 @@ final class Base {
 			$headers['X-Forwarded-Proto']=='https'?'https':'http';
 		$base='';
 		if (PHP_SAPI!='cli')
-			$base=preg_replace('/\/[^\/]+$/','',$_SERVER['SCRIPT_NAME']);
-		preg_match('/'.preg_quote($base,'/').'(.*)/',
-			parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH),$path);
+			$base=rtrim(dirname($_SERVER['SCRIPT_NAME']),'/');
+		$path=preg_replace('/^'.preg_quote($base,'/').'/','',
+			parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH));
 		call_user_func_array('session_set_cookie_params',
 			$jar=array(
 				'expire'=>0,
@@ -1540,9 +1605,10 @@ final class Base {
 						$headers['User-Agent']:'')),
 			'AJAX'=>isset($headers['X-Requested-With']) &&
 				$headers['X-Requested-With']=='XMLHttpRequest',
+			'ALIASES'=>array(),
 			'AUTOLOAD'=>'./',
 			'BASE'=>$base,
-			'BODY'=>file_get_contents('php://input'),
+			'BODY'=>NULL,
 			'CACHE'=>FALSE,
 			'CASELESS'=>TRUE,
 			'DEBUG'=>0,
@@ -1572,13 +1638,14 @@ final class Base {
 			'ONERROR'=>NULL,
 			'PACKAGE'=>self::PACKAGE,
 			'PARAMS'=>array(),
-			'PATH'=>$path[1],
+			'PATH'=>$path,
 			'PATTERN'=>NULL,
 			'PLUGINS'=>$this->fixslashes(__DIR__).'/',
 			'PORT'=>isset($_SERVER['SERVER_PORT'])?
 				$_SERVER['SERVER_PORT']:NULL,
 			'PREFIX'=>NULL,
 			'QUIET'=>FALSE,
+			'RAW'=>FALSE,
 			'REALM'=>$scheme.'://'.
 				$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
 			'RESPONSE'=>'',
