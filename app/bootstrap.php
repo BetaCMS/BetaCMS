@@ -41,7 +41,7 @@ if ($app->get('db.driver') == 'sqlite') {
     //创建用户文件夹
     if (!$usr = $app->get('USR')) {
         $usr = 'usr';
-        $app->get('USR', $usr);
+        $app->set('USR', $usr);
     }
     if (!is_dir(ROOT . '/' . $usr))
         mkdir(ROOT . '/' . $usr, $app::MODE, TRUE);
