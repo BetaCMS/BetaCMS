@@ -4,7 +4,8 @@
  * Base Model Class
  */
 
-abstract class Model extends \Prefab {
+abstract class Model extends \Prefab
+{
 
     /**
      * app instance
@@ -21,7 +22,14 @@ abstract class Model extends \Prefab {
     protected $db;
 
     /**
-     * f3 logger instance
+     * database table prefix
+     *
+     * @var prefix
+     */
+    protected $prefix;
+
+    /**
+     * app logger instance
      *
      * @var logger
      */
@@ -31,9 +39,29 @@ abstract class Model extends \Prefab {
      * initialize model
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->app = \Base::instance();
         $this->db = \Registry::get('db');
         $this->logger = \Registry::get('logger');
+        $this->prefix = $this->app->exists('db.prefix') ? $this->app->get('db.prefix') . '_' : '';
+    }
+
+    /**
+     * data Mapper
+     *
+     */
+    public function mapper($table)
+    {
+        return new DB\SQL\Mapper($this->db, strpos($table, $this->prefix) == 0 ? $table : $this->prefix . $table);
+    }
+
+    /**
+     * data Schema
+     *
+     */
+    protected function schema()
+    {
+        return new \DB\SQL\Schema($this->db);
     }
 }
