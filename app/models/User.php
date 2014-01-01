@@ -17,7 +17,7 @@ class User extends Model
     {
         $schema = $this->schema();
 
-        if ($schema->alterTable($this->table)) {
+        if ($schema->existsTables($this->table)) {
             return;
         }
         $schema->dropTable($this->table);
@@ -43,6 +43,7 @@ class User extends Model
     public function index()
     {
         $user = self::mapper($this->table);
+
 
         $user->load();
         if (!$user->user_login) {
@@ -74,10 +75,10 @@ class User extends Model
             $user->save();
         }
 
-        foreach ($user->find() as $u) {
+        /*foreach ($user->query as $u) {
             echo var_dump($u->cast());
-        }
-        echo $user->count();
+        }*/
+        //echo var_dump($user);
 
 
         echo 'models';

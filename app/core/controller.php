@@ -30,4 +30,16 @@ abstract class Controller extends \Prefab
         $this->app = \Base::instance();
         $this->logger = \Registry::get('logger');
     }
+
+
+    /**
+     * render view
+     * @return string
+     * @param $view string
+     *
+     */
+    public function render($view)
+    {
+        return \View::instance()->render(($this->app->exists('theme') ? trim($this->app->get('theme'), '/') . '/' : '') . $view);
+    }
 }

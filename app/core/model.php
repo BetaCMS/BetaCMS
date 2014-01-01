@@ -44,7 +44,7 @@ abstract class Model extends \Prefab
         $this->app = \Base::instance();
         $this->db = \Registry::get('db');
         $this->logger = \Registry::get('logger');
-        $this->prefix = $this->app->exists('db.prefix') ? $this->app->get('db.prefix') . '_' : '';
+        $this->prefix = $this->app->exists('db.prefix') ? "{$this->app->get('db.prefix')}_" : '';
     }
 
     /**
@@ -53,7 +53,7 @@ abstract class Model extends \Prefab
      */
     public function mapper($table)
     {
-        return new DB\SQL\Mapper($this->db, strpos($table, $this->prefix) == 0 ? $table : $this->prefix . $table);
+        return new DB\SQL\Mapper($this->db, strpos($table, $this->prefix) === 0 ? $table : $this->prefix . $table);
     }
 
     /**

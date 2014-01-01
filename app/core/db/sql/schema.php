@@ -184,6 +184,20 @@ class Schema extends DB_Utils {
     }
 
     /**
+     * returns true if the table is exists
+     * @param $name
+     * @return bool
+     */
+
+    public function existsTables($name)
+    {
+        if ($all = $this->getTables()) {
+            return in_array(strtolower($name), $all);
+        }
+        return false;
+    }
+
+    /**
      * returns a table object for creation
      * @param $name
      * @return bool|TableCreator
@@ -571,7 +585,7 @@ class TableModifier extends TableBuilder {
             if ($col->pkey)
                 $pkeys[$key] = $col;
         // indexes
-        $indexes = $this->listIndex();    
+        $indexes = $this->listIndex();
         // drop fields
         if (!empty($this->rebuild_cmd) && array_key_exists('drop', $this->rebuild_cmd))
             foreach ($this->rebuild_cmd['drop'] as $name)
@@ -595,7 +609,7 @@ class TableModifier extends TableBuilder {
                                 unset($indexes[$col]);
                         }
                     }
-                }       
+                }
         // create new table
         $oname = $this->name;
         $this->queries[] = $this->rename($oname.'_temp', false);
@@ -622,7 +636,7 @@ class TableModifier extends TableBuilder {
         // add existing indexes
         foreach (array_reverse($indexes) as $name=>$conf) {
             if (is_int(strpos($name, '__')))
-                $name = explode('__', $name); 
+                $name = explode('__', $name);
             if ($exec) {
                 $t = $this->schema->alterTable($oname);
                 $t->dropIndex($name);
@@ -742,7 +756,7 @@ class TableModifier extends TableBuilder {
             trigger_error('cannot rename column. it does not exist.');
         if (in_array($new_name, array_keys($existing_columns)))
             trigger_error('cannot rename column. new column already exist.');
-        
+
         if (preg_match('/sqlite2?/', $this->db->driver()))
             // SQlite does not support drop or rename column directly
             $this->rebuild_cmd['rename'][$name] = $new_name;

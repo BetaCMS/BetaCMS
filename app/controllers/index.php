@@ -14,7 +14,6 @@ class Index extends Controller
     public function index($app, $params)
     {
         User::instance()->index();
-
-        echo \View::instance()->render('default/index.htm');
+        echo $this->render('index.htm');
     }
 }
