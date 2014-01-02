@@ -15,6 +15,17 @@ if (file_exists('config/config.ini'))
 // @see http://fatfreeframework.com/quick-reference#autoload
 $app->set('AUTOLOAD', 'controllers/|models/|core/');
 
+
+//创建用户文件夹
+if (!$usr = trim($app->get('usr'), '/')) {
+    $usr = 'usr';
+    $app->set('usr', $usr);
+}
+if (!is_dir(ROOT . '/' . $usr))
+    mkdir(ROOT . '/' . $usr, $app::MODE, TRUE);
+//指定后台ui与前台ui
+$app->concat('UI', "|../{$usr}/themes/");
+
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
 // default error pages if site is not being debugged
@@ -32,30 +43,23 @@ if (PHP_SAPI !== 'cli' && empty($debug)) {
 }
 
 // setup application logging
-$logger = new \Log(date("Y-m-d") . '.log');
+$logger = new \Log(date("Y - m - d") . '.log');
 \Registry::set('logger', $logger);
 
 // setup database connection params
 // @see http://fatfreeframework.com/databases
 if ($app->get('db.driver') == 'sqlite') {
-    //创建用户文件夹
-    if (!$usr = $app->get('USR')) {
-        $usr = 'usr';
-        $app->set('USR', $usr);
-    }
-    if (!is_dir(ROOT . '/' . $usr))
-        mkdir(ROOT . '/' . $usr, $app::MODE, TRUE);
 
     $dsn = $app->get('db.dsn');
     $dfile = ROOT . '/' . $usr . substr($dsn, strpos($dsn, '/'));
     if (!file_exists($dfile)) {
-        die("<h1>无数据库!</h1>");
+        die(" < h1>无数据库!</h1 > ");
     }
     $dsn = substr($dsn, 0, strpos($dsn, '/')) . $dfile;
     $db = new \DB\SQL($dsn);
 } else {
     if (!$app->get('db.dsn')) {
-        $app->set('db.dsn', sprintf("%s:host=%s;port=%d;dbname=%s",
+        $app->set('db.dsn', sprintf(" % s:host =%s;port =%d;dbname =%s",
                 $app->get('db.driver'), $app->get('db.hostname'), $app->get('db.port'), $app->get('db.name'))
         );
     }
@@ -94,12 +98,10 @@ if (!$app->exists('SESSION.notifications')) {
 // @see http://fatfreeframework.com/routing-engine
 // firstly load routes from ini file
 //$app->config('config/routes.ini');
-$app->route('GET /','Index->index');
+$app->route('GET /', 'Index->index');
 
 // object mode
 $app->route('GET /@controller/@action', 'controllers\@controller->@action');
-
-
 
 
 $app->run();
