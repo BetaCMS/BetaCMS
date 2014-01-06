@@ -32,6 +32,15 @@ abstract class Controller extends \Prefab
     }
 
 
+    function beforeroute($app, $url)
+    {
+
+
+        echo var_dump($url);
+        echo var_dump($url);
+    }
+
+
     /**
      * render view
      * @return string
@@ -40,6 +49,6 @@ abstract class Controller extends \Prefab
      */
     public function render($view)
     {
-        return \View::instance()->render(($this->app->exists('theme') ? trim($this->app->get('theme'), '/') . '/' : '') . $view);
+        return \Template::instance()->render(($this->app->exists('theme') ? trim($this->app->get('theme'), '/') . '/' : '') . $view);
     }
 }

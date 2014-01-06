@@ -15,16 +15,23 @@ if (file_exists('config/config.ini'))
 // @see http://fatfreeframework.com/quick-reference#autoload
 $app->set('AUTOLOAD', 'controllers/|models/|core/');
 
-
 //创建用户文件夹
-if (!$usr = trim($app->get('usr'), '/')) {
-    $usr = 'usr';
-    $app->set('usr', $usr);
+if (!$site = trim($app->get('site'), '/')) {
+    $site = 'site';
+    $app->set('site', $site);
+    if (!is_dir(ROOT . '/' . $site))
+        mkdir(ROOT . '/' . $site, $app::MODE, TRUE);
 }
-if (!is_dir(ROOT . '/' . $usr))
-    mkdir(ROOT . '/' . $usr, $app::MODE, TRUE);
+
+
+$app->set('TEMP', "../$site/{$app->get('TEMP')}");
+
+$base = $app->get('BASE');
+$app->set('admintheme', $base . '/app/themes');
+$app->set('themes', "$base/$site/themes/{$app->get('theme')}");
+
 //指定后台ui与前台ui
-$app->concat('UI', "|../{$usr}/themes/");
+$app->concat('UI', "|../{$site}/themes/");
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
@@ -43,7 +50,7 @@ if (PHP_SAPI !== 'cli' && empty($debug)) {
 }
 
 // setup application logging
-$logger = new \Log(date("Y - m - d") . '.log');
+$logger = new \Log(date("Y-m-d") . '.log');
 \Registry::set('logger', $logger);
 
 // setup database connection params
@@ -51,7 +58,7 @@ $logger = new \Log(date("Y - m - d") . '.log');
 if ($app->get('db.driver') == 'sqlite') {
 
     $dsn = $app->get('db.dsn');
-    $dfile = ROOT . '/' . $usr . substr($dsn, strpos($dsn, '/'));
+    $dfile = ROOT . '/' . $site . substr($dsn, strpos($dsn, '/'));
     if (!file_exists($dfile)) {
         die(" < h1>无数据库!</h1 > ");
     }
@@ -100,8 +107,13 @@ if (!$app->exists('SESSION.notifications')) {
 //$app->config('config/routes.ini');
 $app->route('GET /', 'Index->index');
 
+
 // object mode
-$app->route('GET /@controller/@action', 'controllers\@controller->@action');
+$app->route('GET /admin', 'admin\index->index');
+$app->route('GET /admin/@action', 'admin\@action->index');
+$app->route('GET /admin/@controller/@action', 'admin\@controller->@action');
+
+$app->route('GET /@controller/@action', '@controller->@action');
 
 
 $app->run();

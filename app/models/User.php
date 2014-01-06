@@ -11,6 +11,7 @@ class User extends Model
     {
         parent::__construct();
         $this->table = $this->prefix . "users";
+        $this->createTable();
     }
 
     protected function createTable()
@@ -80,7 +81,5 @@ class User extends Model
         }*/
         //echo var_dump($user);
 
-
-        echo 'models';
     }
 }
