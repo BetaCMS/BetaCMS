@@ -7,11 +7,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>dashboard</title>
-    <link href="{{@themes}}/asserts/css/bootstrap.css" rel="stylesheet">
-    <link href="{{@themes}}/asserts/css/dashboard.css" rel="stylesheet">
+    <link href="<?php echo $admintheme; ?>/asserts/css/bootstrap.css" rel="stylesheet">
+    <link href="<?php echo $admintheme; ?>/asserts/css/dashboard.css" rel="stylesheet">
     <!--[if lt IE 9]>
-    <script src="{{@themes}}/asserts/js/html5shiv.js"></script>
-    <script src="{{@themes}}/asserts/js/respond.min.js"></script>
+    <script src="<?php echo $admintheme; ?>/asserts/js/html5shiv.js"></script>
+    <script src="<?php echo $admintheme; ?>/asserts/js/respond.min.js"></script>
     <![endif]-->
 </head>
 <body>

@@ -34,10 +34,12 @@ abstract class Controller extends \Prefab
 
     function beforeroute($app, $url)
     {
-
-
-        echo var_dump($url);
-        echo var_dump($url);
+        $base = $app->get('BASE');
+        $app->set('admintheme', "$base/{$app->get('site')}/themes/admin");
+        $app->set('themes', "$base/{$app->get('site')}/themes/{$app->get('theme')}");
+        if (!empty($url) && preg_match('/^\/admin\/?/', $url[0])) {
+            $this->app->set('theme', 'admin');
+        }
     }
 
 

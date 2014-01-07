@@ -26,12 +26,9 @@ if (!$site = trim($app->get('site'), '/')) {
 
 $app->set('TEMP', "../$site/{$app->get('TEMP')}");
 
-$base = $app->get('BASE');
-$app->set('admintheme', $base . '/app/themes');
-$app->set('themes', "$base/$site/themes/{$app->get('theme')}");
 
-//指定后台ui与前台ui
-$app->concat('UI', "|../{$site}/themes/");
+
+$app->set('UI', "../{$site}/themes/");
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
