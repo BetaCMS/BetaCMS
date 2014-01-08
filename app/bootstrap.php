@@ -4,7 +4,6 @@ namespace application;
 define('ROOT', realpath('../'));
 
 $app = require_once('lib/base.php');
-
 // read config and overrides
 // @see http://fatfreeframework.com/framework-variables#configuration-files
 $app->config('config/default.ini');
@@ -57,7 +56,7 @@ if ($app->get('db.driver') == 'sqlite') {
     $dsn = $app->get('db.dsn');
     $dfile = ROOT . '/' . $site . substr($dsn, strpos($dsn, '/'));
     if (!file_exists($dfile)) {
-        die(" < h1>无数据库!</h1 > ");
+        die('<h1>无数据库!</h1>');
     }
     $dsn = substr($dsn, 0, strpos($dsn, '/')) . $dfile;
     $db = new \DB\SQL($dsn);

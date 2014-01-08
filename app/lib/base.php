@@ -19,7 +19,7 @@ final class Base {
 	//@{ Framework details
 	const
 		PACKAGE='Fat-Free Framework',
-		VERSION='3.2.1-Dev';
+		VERSION='3.2.0-Release';
 	//@}
 
 	//@{ HTTP status codes (RFC 2616)
@@ -89,7 +89,6 @@ final class Base {
 		E_Fatal='Fatal error: %s',
 		E_Open='Unable to open %s',
 		E_Routes='No routes specified',
-		E_Class='Invalid class %s',
 		E_Method='Invalid method %s',
 		E_Hive='Invalid hive key %s';
 	//@}
@@ -147,10 +146,9 @@ final class Base {
 	*	@param $str string
 	**/
 	function parse($str) {
-		preg_match_all('/(\w+)\h*=\h*(.+?)(?=,|$)/',
-			$str,$pairs,PREG_SET_ORDER);
+		preg_match_all('/(\w+)=(.+?)(?=,|$)/',$str,$pairs,PREG_SET_ORDER);
 		foreach ($pairs as $pair)
-			$this->hive['PARAMS'][$pair[1]]=trim($pair[2]);
+			$this->hive['PARAMS'][$pair[1]]=$pair[2];
 	}
 
 	/**
@@ -1217,8 +1215,6 @@ final class Base {
 				else
 					$this->expire(0);
 				if (!strlen($body)) {
-					if (!$this->hive['RAW'])
-						$this->hive['BODY']=file_get_contents('php://input');
 					ob_start();
 					// Call route handler
 					$this->call($handler,array($this,$args),
@@ -1275,16 +1271,16 @@ final class Base {
 			preg_match('/(.+)\h*(->|::)\h*(.+)/s',$func,$parts)) {
 			// Convert string to executable PHP callback
 			if (!class_exists($parts[1]))
-				$this->error(500,sprintf(self::E_Class,$parts[1]));
+				$this->error(404);
 			if ($parts[2]=='->')
 				$parts[1]=is_subclass_of($parts[1],'Prefab')?
 					call_user_func($parts[1].'::instance'):
-					new $parts[1]($this);
+					new $parts[1];
 			$func=array($parts[1],$parts[3]);
 		}
 		if (!is_callable($func) && $hooks=='beforeroute,afterroute')
 			// No route handler
-			$this->error(500,sprintf(self::E_Method,$parts[0]));
+			$this->error(404);
 		$obj=FALSE;
 		if (is_array($func)) {
 			$hooks=$this->split($hooks);
@@ -1485,11 +1481,11 @@ final class Base {
 	protected function autoload($class) {
 		$class=$this->fixslashes(ltrim($class,'\\'));
 		foreach ($this->split($this->hive['PLUGINS'].';'.
-			$this->hive['AUTOLOAD']) as $auto){
+			$this->hive['AUTOLOAD']) as $auto)
 			if (is_file($file=$auto.$class.'.php') ||
 				is_file($file=$auto.strtolower($class).'.php') ||
 				is_file($file=strtolower($auto.$class).'.php'))
-				return require($file);}
+				return require($file);
 	}
 
 	/**
@@ -1574,9 +1570,9 @@ final class Base {
 			$headers['X-Forwarded-Proto']=='https'?'https':'http';
 		$base='';
 		if (PHP_SAPI!='cli')
-			$base=rtrim(dirname($_SERVER['SCRIPT_NAME']),'/');
-		$path=preg_replace('/^'.preg_quote($base,'/').'/','',
-			parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH));
+			$base=dirname($_SERVER['SCRIPT_NAME']);
+		$path=substr($url=parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH),
+			strpos($url,$base)+strlen($base));
 		call_user_func_array('session_set_cookie_params',
 			$jar=array(
 				'expire'=>0,
@@ -1608,7 +1604,7 @@ final class Base {
 			'ALIASES'=>array(),
 			'AUTOLOAD'=>'./',
 			'BASE'=>$base,
-			'BODY'=>NULL,
+			'BODY'=>file_get_contents('php://input'),
 			'CACHE'=>FALSE,
 			'CASELESS'=>TRUE,
 			'DEBUG'=>0,
@@ -1645,7 +1641,6 @@ final class Base {
 				$_SERVER['SERVER_PORT']:NULL,
 			'PREFIX'=>NULL,
 			'QUIET'=>FALSE,
-			'RAW'=>FALSE,
 			'REALM'=>$scheme.'://'.
 				$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
 			'RESPONSE'=>'',

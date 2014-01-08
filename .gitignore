@@ -3,3 +3,4 @@
 app/logs/
 site/*.db
 site/*.sqlite
+site/temp/

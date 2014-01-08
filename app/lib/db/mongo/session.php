@@ -68,7 +68,7 @@ class Session extends Mapper {
 		$this->set('stamp',time());
 		$this->save();
 		if (!$sent) {
-			if (isset($_COOKIE['_']))
+			if ($_COOKIE['_'])
 				setcookie('_','',strtotime('-1 year'));
 			call_user_func_array('setcookie',
 				array('_',$csrf)+$fw->get('JAR'));

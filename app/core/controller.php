@@ -22,6 +22,13 @@ abstract class Controller extends \Prefab
     protected $logger;
 
     /**
+     * page startime
+     *
+     * @var startime
+     */
+    private $startime;
+
+    /**
      * initialize controller
      *
      */
@@ -41,6 +48,11 @@ abstract class Controller extends \Prefab
             $this->app->set('theme', 'admin');
         }
     }
+
+
+    /*function afterroute()
+    {
+    }*/
 
 
     /**

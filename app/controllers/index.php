@@ -13,8 +13,8 @@ class Index extends Controller
 
     public function index($app, $params)
     {
-        User::instance()->index();
-        Options::instance()->index();
+        //User::instance()->index();
+        //Options::instance()->index();
 
         echo $this->render('index.htm');
     }
