@@ -8,200 +8,498 @@
     <meta name="author" content="">
     <title>dashboard</title>
     <link href="{{@admintheme}}/asserts/css/bootstrap.css" rel="stylesheet">
-    <link href="{{@admintheme}}/asserts/css/theme.css" rel="stylesheet">
-    <link href="{{@admintheme}}/asserts/css/dashboard.css" rel="stylesheet">
+    <link href="{{@admintheme}}/asserts/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{@admintheme}}/asserts/css/common.css" rel="stylesheet">
+    <link href="{{@admintheme}}/asserts/css/common-skin.css" rel="stylesheet">
     <!--[if lt IE 9]>
     <script src="{{@admintheme}}/asserts/js/html5shiv.js"></script>
     <script src="{{@admintheme}}/asserts/js/respond.min.js"></script>
     <![endif]-->
 </head>
-<body>
-
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{@BASE}}">{{@siteName}}</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Settings</a></li>
-                <li><a href="#">Profile</a></li>
-                <li><a href="#">Help</a></li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-2 sidebar">
-            <ul class="nav nav-sidebar">
-                <li class="active"><a href="#">Overview</a></li>
-                <li><a href="#">Reports</a></li>
-                <li><a href="#">Analytics</a></li>
-                <li><a href="#">Export</a></li>
-            </ul>
-            <ul class="nav nav-sidebar">
-                <li><a href="">Nav item</a></li>
-                <li><a href="">Nav item again</a></li>
-                <li><a href="">One more nav</a></li>
-                <li><a href="">Another nav item</a></li>
-                <li><a href="">More navigation</a></li>
-            </ul>
-            <ul class="nav nav-sidebar">
-                <li><a href="">Nav item again</a></li>
-                <li><a href="">One more nav</a></li>
-                <li><a href="">Another nav item</a></li>
-            </ul>
-        </div>
-        <div class="col-sm-10 col-sm-offset-2 main">
-            <h1 class="page-header">Dashboard</h1>
-
-            <h2 class="sub-header">Section title</h2>
-
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>1,001</td>
-                        <td>Lorem</td>
-                        <td>ipsum</td>
-                        <td>dolor</td>
-                        <td>sit</td>
-                    </tr>
-                    <tr>
-                        <td>1,002</td>
-                        <td>amet</td>
-                        <td>consectetur</td>
-                        <td>adipiscing</td>
-                        <td>elit</td>
-                    </tr>
-                    <tr>
-                        <td>1,003</td>
-                        <td>Integer</td>
-                        <td>nec</td>
-                        <td>odio</td>
-                        <td>Praesent</td>
-                    </tr>
-                    <tr>
-                        <td>1,003</td>
-                        <td>libero</td>
-                        <td>Sed</td>
-                        <td>cursus</td>
-                        <td>ante</td>
-                    </tr>
-                    <tr>
-                        <td>1,004</td>
-                        <td>dapibus</td>
-                        <td>diam</td>
-                        <td>Sed</td>
-                        <td>nisi</td>
-                    </tr>
-                    <tr>
-                        <td>1,005</td>
-                        <td>Nulla</td>
-                        <td>quis</td>
-                        <td>sem</td>
-                        <td>at</td>
-                    </tr>
-                    <tr>
-                        <td>1,006</td>
-                        <td>nibh</td>
-                        <td>elementum</td>
-                        <td>imperdiet</td>
-                        <td>Duis</td>
-                    </tr>
-                    <tr>
-                        <td>1,007</td>
-                        <td>sagittis</td>
-                        <td>ipsum</td>
-                        <td>Praesent</td>
-                        <td>mauris</td>
-                    </tr>
-                    <tr>
-                        <td>1,008</td>
-                        <td>Fusce</td>
-                        <td>nec</td>
-                        <td>tellus</td>
-                        <td>sed</td>
-                    </tr>
-                    <tr>
-                        <td>1,009</td>
-                        <td>augue</td>
-                        <td>semper</td>
-                        <td>porta</td>
-                        <td>Mauris</td>
-                    </tr>
-                    <tr>
-                        <td>1,010</td>
-                        <td>massa</td>
-                        <td>Vestibulum</td>
-                        <td>lacinia</td>
-                        <td>arcu</td>
-                    </tr>
-                    <tr>
-                        <td>1,011</td>
-                        <td>eget</td>
-                        <td>nulla</td>
-                        <td>Class</td>
-                        <td>aptent</td>
-                    </tr>
-                    <tr>
-                        <td>1,012</td>
-                        <td>taciti</td>
-                        <td>sociosqu</td>
-                        <td>ad</td>
-                        <td>litora</td>
-                    </tr>
-                    <tr>
-                        <td>1,013</td>
-                        <td>torquent</td>
-                        <td>per</td>
-                        <td>conubia</td>
-                        <td>nostra</td>
-                    </tr>
-                    <tr>
-                        <td>1,014</td>
-                        <td>per</td>
-                        <td>inceptos</td>
-                        <td>himenaeos</td>
-                        <td>Curabitur</td>
-                    </tr>
-                    <tr>
-                        <td>1,015</td>
-                        <td>sodales</td>
-                        <td>ligula</td>
-                        <td>in</td>
-                        <td>libero</td>
-                    </tr>
-                    </tbody>
-                </table>
+<body class="overflow-hidden">
+<!-- Overlay Div -->
+<div id="overlay">
+    <div class="overlay-inner">
+        <div id="followingBallsG">
+            <div id="followingBallsG_1" class="followingBallsG">
+            </div>
+            <div id="followingBallsG_2" class="followingBallsG">
+            </div>
+            <div id="followingBallsG_3" class="followingBallsG">
+            </div>
+            <div id="followingBallsG_4" class="followingBallsG">
             </div>
         </div>
     </div>
 </div>
-<div class="footer">
-    <p>Blog template built for <a href="http://getbootstrap.com">Bootstrap</a> by <a
-            href="https://twitter.com/mdo">@mdo</a>.</p>
-</div>
+
+<a href="" id="theme-setting-icon"><i class="fa fa-cog fa-lg"></i></a>
+<div id="theme-setting">
+    <div class="title">
+        <strong class="no-margin">Skin Color</strong>
+    </div>
+    <div class="theme-box">
+        <a class="theme-color" style="background:#323447" id="default"></a>
+        <a class="theme-color" style="background:#efefef" id="skin-1"></a>
+        <a class="theme-color" style="background:#a93922" id="skin-2"></a>
+        <a class="theme-color" style="background:#3e6b96" id="skin-3"></a>
+        <a class="theme-color" style="background:#635247" id="skin-4"></a>
+    </div>
+</div><!-- /theme-setting -->
+
+<div id="wrapper" class="preload">
+<div id="top-nav" class="skin-2 fixed">
+    <button type="button" class="navbar-toggle pull-left" id="sidebarToggle">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <ul class="nav-notification clearfix">
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-envelope fa-lg"></i>
+                <span class="notification-label bounceIn animation-delay4">7</span>
+            </a>
+            <ul class="dropdown-menu message dropdown-1">
+                <li><a>You have 4 new unread messages</a></li>
+                <li>
+                    <a class="clearfix" href="#">
+                        <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+                        <div class="detail">
+                            <strong>John Doe</strong>
+                            <p class="no-margin">
+                                Lorem ipsum dolor sit amet...
+                            </p>
+                            <small class="text-muted"><i class="fa fa-check text-success"></i> 27m ago</small>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="clearfix" href="#">
+                        <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+                        <div class="detail">
+                            <strong>Jane Doe</strong>
+                            <p class="no-margin">
+                                Lorem ipsum dolor sit amet...
+                            </p>
+                            <small class="text-muted"><i class="fa fa-check text-success"></i> 5hr ago</small>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="clearfix" href="#">
+                        <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+                        <div class="detail">
+                            <strong>Bill Doe</strong>
+                            <p class="no-margin">
+                                Lorem ipsum dolor sit amet...
+                            </p>
+                            <small class="text-muted"><i class="fa fa-reply"></i> Yesterday</small>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="clearfix" href="#">
+                        <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+                        <div class="detail">
+                            <strong>Baby Doe</strong>
+                            <p class="no-margin">
+                                Lorem ipsum dolor sit amet...
+                            </p>
+                            <small class="text-muted"><i class="fa fa-reply"></i> 9 Feb 2013</small>
+                        </div>
+                    </a>
+                </li>
+                <li><a href="#">View all messages</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-tasks fa-lg"></i>
+                <span class="notification-label bounceIn animation-delay5">4</span>
+            </a>
+            <ul class="dropdown-menu task dropdown-2">
+                <li><a href="#">You have 4 tasks to complete</a></li>
+                <li>
+                    <a href="#">
+                        <div class="clearfix">
+                            <span class="pull-left">Bug Fixes</span>
+                            <small class="pull-right text-muted">78%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width:78%"></div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="clearfix">
+                            <span class="pull-left">Software Updating</span>
+                            <small class="pull-right text-muted">54%</small>
+                        </div>
+                        <div class="progress progress-striped">
+                            <div class="progress-bar progress-bar-success" style="width:54%"></div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="clearfix">
+                            <span class="pull-left">Database Migration</span>
+                            <small class="pull-right text-muted">23%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-warning" style="width:23%"></div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <div class="clearfix">
+                            <span class="pull-left">Unit Testing</span>
+                            <small class="pull-right text-muted">92%</small>
+                        </div>
+                        <div class="progress progress-striped active">
+                            <div class="progress-bar progress-bar-danger " style="width:92%"></div>
+                        </div>
+                    </a>
+                </li>
+                <li><a href="#">View all tasks</a></li>
+            </ul>
+        </li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-bell fa-lg"></i>
+                <span class="notification-label bounceIn animation-delay6">5</span>
+            </a>
+            <ul class="dropdown-menu notification dropdown-3">
+                <li><a href="#">You have 5 new notifications</a></li>
+                <li>
+                    <a href="#">
+								<span class="notification-icon bg-warning">
+									<i class="fa fa-warning"></i>
+								</span>
+                        <span class="m-left-xs">Server #2 not responding.</span>
+                        <span class="time text-muted">Just now</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+								<span class="notification-icon bg-success">
+									<i class="fa fa-plus"></i>
+								</span>
+                        <span class="m-left-xs">New user registration.</span>
+                        <span class="time text-muted">2m ago</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+								<span class="notification-icon bg-danger">
+									<i class="fa fa-bolt"></i>
+								</span>
+                        <span class="m-left-xs">Application error.</span>
+                        <span class="time text-muted">5m ago</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+								<span class="notification-icon bg-success">
+									<i class="fa fa-usd"></i>
+								</span>
+                        <span class="m-left-xs">2 items sold.</span>
+                        <span class="time text-muted">1hr ago</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+								<span class="notification-icon bg-success">
+									<i class="fa fa-plus"></i>
+								</span>
+                        <span class="m-left-xs">New user registration.</span>
+                        <span class="time text-muted">1hr ago</span>
+                    </a>
+                </li>
+                <li><a href="#">View all notifications</a></li>
+            </ul>
+        </li>
+        <li class="profile dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <strong>Hizhengfu</strong>
+                <span><i class="fa fa-chevron-down"></i></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="clearfix" href="#">
+                        <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+                        <div class="detail">
+                            <strong>Hizhengfu</strong>
+                            <p class="grey">hizhengfu@gmail.com</p>
+                        </div>
+                    </a>
+                </li>
+                <li><a tabindex="-1" href="profile.html" class="main-link"><i class="fa fa-edit fa-lg"></i> Edit profile</a></li>
+                <li><a tabindex="-1" href="gallery.html" class="main-link"><i class="fa fa-picture-o fa-lg"></i> Photo Gallery</a></li>
+                <li><a tabindex="-1" href="#" class="theme-setting"><i class="fa fa-cog fa-lg"></i> Setting</a></li>
+                <li class="divider"></li>
+                <li><a tabindex="-1" href="login.html" class="main-link"><i class="fa fa-lock fa-lg"></i> Log out</a></li>
+            </ul>
+        </li>
+    </ul>
+</div><!-- /top-nav-->
+
+<aside class="skin-2 fixed">
+<div class="brand">
+    <span>BetaCMS</span>
+    <span class="text-toggle"> Admin</span>
+</div><!-- /brand -->
+<div class="sidebar-inner">
+<div class="size-toggle">
+    <a class="btn btn-sm" id="sizeToggle">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </a>
+    <a class="btn btn-sm pull-right" href="login.html">
+        <i class="fa fa-power-off"></i>
+    </a>
+</div><!-- /size-toggle -->
+<div class="user-block clearfix">
+    <img src="{{@admintheme}}/asserts/img/user.jpg" alt="User Avatar">
+    <div class="detail">
+        <strong>Hizhengfu</strong><span class="badge badge-danger bounceIn animation-delay4 m-left-xs">4</span>
+        <ul class="list-inline">
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="inbox.html" class="no-margin">Inbox</a></li>
+        </ul>
+    </div>
+</div><!-- /user-block -->
+<div class="search-block">
+    <div class="input-group">
+        <input type="text" class="form-control input-sm" placeholder="search here...">
+						<span class="input-group-btn">
+							<button class="btn btn-default btn-sm" type="button"><i class="fa fa-search"></i></button>
+						</span>
+    </div><!-- /input-group -->
+</div><!-- /search-block -->
+<div class="main-menu">
+<ul>
+    <li>
+        <a href="index.html">
+								<span class="menu-icon">
+									<i class="fa fa-desktop fa-lg"></i>
+								</span>
+								<span class="text">
+									Dashboard
+								</span>
+            <span class="menu-hover"></span>
+        </a>
+    </li>
+    <li class="active">
+        <a href="#">
+								<span class="menu-icon">
+									<i class="fa fa-file-text fa-lg"></i>
+								</span>
+								<span class="text">
+									Page
+								</span>
+            <span class="menu-hover"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="login.html">
+                    Sign in
+                </a>
+            </li>
+            <li>
+                <a href="register.html">
+                    Sign up
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    Profile
+                </a>
+            </li>
+            <li>
+                <a href="blog.html">
+                    Blog
+                </a>
+            </li>
+            <li>
+                <a href="single_post.html">
+                    Single Post
+                </a>
+            </li>
+            <li>
+                <a href="landing.html">
+                    Landing
+                </a>
+            </li>
+            <li>
+                <a href="search_result.html">
+                    Search Result
+                </a>
+            </li>
+            <li>
+                <a href="pricing.html">
+                    Priciing table
+                </a>
+            </li>
+            <li>
+                <a href="invoice.html">
+                    Invoice
+                </a>
+            </li>
+            <li>
+                <a href="faq.html">
+                    FAQ
+                </a>
+            </li>
+            <li>
+                <a href="error404.html">
+                    Error 404
+                </a>
+            </li>
+            <li>
+                <a href="error500.html">
+                    Error 500
+                </a>
+            </li>
+            <li>
+                <a href="blank.html">
+                    Blank
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								<span class="menu-icon">
+									<i class="fa fa-tag fa-lg"></i>
+								</span>
+								<span class="text">
+									Component
+								</span>
+            <span class="badge badge-success bounceIn animation-delay5">9</span>
+            <span class="menu-hover"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="ui_element.html">
+                    UI Features
+                </a>
+            </li>
+            <li>
+                <a href="button.html">
+                    Button & Icons
+                </a>
+            </li>
+            <li>
+                <a href="tab.html">
+                    Tab
+                </a>
+            </li>
+            <li>
+                <a href="nestable_list.html">
+                    Nestable List
+                </a>
+            </li>
+            <li>
+                <a href="calendar.html">
+                    Calendar
+                </a>
+            </li>
+            <li>
+                <a href="table.html">
+                    Table
+                </a>
+            </li>
+            <li>
+                <a href="widget.html">
+                    Widget
+                </a>
+            </li>
+            <li>
+                <a href="form_element.html">
+                    Form Element
+                </a>
+            </li>
+            <li>
+                <a href="form_wizard.html">
+                    Form Wizard
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    <li>
+        <a href="timeline.html">
+								<span class="menu-icon">
+									<i class="fa fa-clock-o fa-lg"></i>
+								</span>
+								<span class="text">
+									Timeline
+								</span>
+            <span class="menu-hover"></span>
+        </a>
+    </li>
+    <li>
+        <a href="gallery.html">
+								<span class="menu-icon">
+									<i class="fa fa-picture-o fa-lg"></i>
+								</span>
+								<span class="text">
+									Gallery
+								</span>
+            <span class="menu-hover"></span>
+        </a>
+    </li>
+    <li>
+        <a href="inbox.html">
+								<span class="menu-icon">
+									<i class="fa fa-envelope fa-lg"></i>
+								</span>
+								<span class="text">
+									Inbox
+								</span>
+            <span class="badge badge-danger bounceIn animation-delay6">4</span>
+            <span class="menu-hover"></span>
+        </a>
+    </li>
+    <li>
+        <a href="contact.html">
+								<span class="menu-icon">
+									<i class="fa fa-phone fa-lg"></i>
+								</span>
+								<span class="text">
+									Contact
+								</span>
+            <span class="menu-hover"></span>
+        </a>
+    </li>
+</ul>
+
+
+</div><!-- /main-menu -->
+</div><!-- /sidebar-inner -->
+</aside>
+
+<div id="main-container">
+    <div id="breadcrumb">
+        <ul class="breadcrumb">
+            <li><i class="fa fa-home"></i><a href="index.html"> Home</a></li>
+            <li class="active">Blank page</li>
+        </ul>
+    </div><!-- breadcrumb -->
+</div><!-- /main-container -->
+</div><!-- /wrapper -->
+
+<a href="" id="scroll-to-top" class="hidden-print"><i class="fa fa-chevron-up"></i></a>
+
 <script src="{{@admintheme}}/asserts/js/jquery-1.10.2.min.js"></script>
 <script src="{{@admintheme}}/asserts/js/holder.js"></script>
 <script src="{{@admintheme}}/asserts/js/bootstrap.js"></script>
+<script src="{{@admintheme}}/asserts/js/jquery.cookie.min.js"></script>
+<script src="{{@admintheme}}/asserts/js/common.js"></script>
 </body>
 </html>
