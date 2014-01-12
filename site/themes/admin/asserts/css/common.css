@@ -1656,7 +1656,8 @@ svg {
     height: 200px
 }
 
-@media (min-width: 481px) and (max-width: 979px) {
+@media (min-width: 481px) and (
+max-width: 979px) {
     .img-demo.product {
         float: none;
         margin-right: 0;

@@ -2148,7 +2148,7 @@ class Preview extends View {
 			return $data;
 		if (!is_dir($tmp=$fw->get('TEMP')))
 			mkdir($tmp,Base::MODE,TRUE);
-		foreach ($fw->split($fw->get('UI')) as $dir)
+		foreach ($fw->split($fw->get('UI')) as $dir){
 			if (is_file($view=$fw->fixslashes($dir.$file))) {
 				if (!is_file($this->view=($tmp.
 					$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
@@ -2173,7 +2173,7 @@ class Preview extends View {
 				if ($ttl)
 					$cache->set($hash,$data);
 				return $data;
-			}
+			}}
 		user_error(sprintf(Base::E_Open,$file));
 	}
 

@@ -14,6 +14,6 @@ class Index extends \Controller
 
     public function index($app, $params)
     {
-        echo $this->render('index.htm');
+        //echo $this->render('index.htm');
     }
 }

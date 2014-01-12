@@ -21,12 +21,6 @@ abstract class Controller extends \Prefab
      */
     protected $logger;
 
-    /**
-     * page startime
-     *
-     * @var startime
-     */
-    private $startime;
 
     /**
      * initialize controller
@@ -41,28 +35,22 @@ abstract class Controller extends \Prefab
 
     function beforeroute($app, $url)
     {
-        $base = $app->get('BASE');
-        $app->set('admintheme', "$base/{$app->get('site')}/themes/admin");
-        $app->set('themes', "$base/{$app->get('site')}/themes/{$app->get('theme')}");
         if (!empty($url) && preg_match('/^\/admin\/?/', $url[0])) {
             $this->app->set('theme', 'admin');
         }
+        $theme = trim($app->get('theme'), '/');
+        $themes = "{$app->get('site')}/themes/$theme";
+        $app->set('themes', $themes);
+        $app->set('UI', "../$themes/");
     }
 
 
-    /*function afterroute()
+    function afterroute($app, $url)
     {
-    }*/
-
-
-    /**
-     * render view
-     * @return string
-     * @param $view string
-     *
-     */
-    public function render($view)
-    {
-        return \Template::instance()->render(($this->app->exists('theme') ? trim($this->app->get('theme'), '/') . '/' : '') . $view);
+        if (!empty($url) && preg_match('/^\/admin\/?/', $url[0])) {
+            echo Template::instance()->render('layout.htm');
+        } else {
+            echo Template::instance()->render('index.htm');
+        }
     }
 }

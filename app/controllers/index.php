@@ -16,6 +16,5 @@ class Index extends Controller
         //User::instance()->index();
         //Options::instance()->index();
 
-        echo $this->render('index.htm');
     }
 }

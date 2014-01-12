@@ -20,14 +20,11 @@ if (!$site = trim($app->get('site'), '/')) {
     $app->set('site', $site);
     if (!is_dir(ROOT . '/' . $site))
         mkdir(ROOT . '/' . $site, $app::MODE, TRUE);
+} else {
+    $app->set('site', trim($app->get('site'), '/'));
 }
 
-
 $app->set('TEMP', "../$site/{$app->get('TEMP')}");
-
-
-
-$app->set('UI', "../{$site}/themes/");
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
