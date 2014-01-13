@@ -5,7 +5,7 @@
  http://weibo.com/jslouvre/
  
  Released under the MIT license
- avalon 1.0beta2
+ avalon 1.0
  ==================================================*/
 (function(DOC) {
     var Registry = {} //将函数曝光到此对象上，方便访问器收集依赖
@@ -2762,9 +2762,43 @@
                 element.value = curValue
             }
         }
-        //https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Input
-        if (/^(password|textarea|text|url|email|date|month|time|week|number)$/.test(type)) {
-            var event = element.attributes["data-duplex-event"] || element.attributes["data-event"] || {}
+        if (type === "radio") {
+            data.handler = function() {
+                element.checked = fixType === "text" ? fn(scope) === element.value : !!fn(scope)
+                element.beforeChecked = element.checked
+            }
+            updateModel = function() {
+                if ($elem.data("duplex-observe") !== false) {
+                    if (fixType === "text") {
+                        fn(scope, element.value)
+                    } else {
+                        var val = !element.beforeChecked
+                        fn(scope, val)
+                        element.checked = val
+                    }
+                }
+            }
+            removeFn = $elem.bind("click", updateModel)
+            data.rollback = function() {
+                $elem.unbind("click", removeFn)
+            }
+        } else if (type === "checkbox") {
+            updateModel = function() {
+                if ($elem.data("duplex-observe") !== false) {
+                    var method = element.checked ? "ensure" : "remove"
+                    avalon.Array[method](fn(scope), element.value)
+                }
+            }
+            data.handler = function() {
+                var array = [].concat(fn(scope)) //强制转换为数组
+                element.checked = array.indexOf(element.value) >= 0
+            }
+            removeFn = $elem.bind("click", updateModel) //IE6-8
+            data.rollback = function() {
+                $elem.unbind("click", removeFn)
+            }
+        } else {
+            var event = element.attributes["data-duplex-event"] || {}
             event = event.value
             if (event === "change") {
                 avalon.bind(element, event, updateModel)
@@ -2804,41 +2838,6 @@
                     }
                 }
             }
-        } else if (type === "radio") {
-            data.handler = function() {
-                element.checked = fixType === "text" ? fn(scope) === element.value : !!fn(scope)
-                element.beforeChecked = element.checked
-            }
-            updateModel = function() {
-                if ($elem.data("duplex-observe") !== false) {
-                    if (fixType === "text") {
-                        fn(scope, element.value)
-                    } else {
-                        var val = !element.beforeChecked
-                        fn(scope, val)
-                        element.checked = val
-                    }
-                }
-            }
-            removeFn = $elem.bind("click", updateModel)
-            data.rollback = function() {
-                $elem.unbind("click", removeFn)
-            }
-        } else if (type === "checkbox") {
-            updateModel = function() {
-                if ($elem.data("duplex-observe") !== false) {
-                    var method = element.checked ? "ensure" : "remove"
-                    avalon.Array[method](fn(scope), element.value)
-                }
-            }
-            data.handler = function() {
-                var array = [].concat(fn(scope)) //强制转换为数组
-                element.checked = array.indexOf(element.value) >= 0
-            }
-            removeFn = $elem.bind("click", updateModel) //IE6-8
-            data.rollback = function() {
-                $elem.unbind("click", removeFn)
-            }
         }
 
         registerSubscriber(data)
@@ -2856,6 +2855,7 @@
         }
         data.handler = function() {
             var curValue = fn(scope)
+            curValue = curValue && curValue.$model || curValue
             curValue = Array.isArray(curValue) ? curValue.map(String) : curValue + ""
             if (curValue + "" !== oldValue) {
                 $elem.val(curValue)
@@ -3678,6 +3678,12 @@
             if (kernel.paths[url]) { //别名机制
                 url = kernel.paths[url]
             }
+
+            var dir=url.substr(0,url.indexOf('/'));
+            if(kernel.paths[dir]){
+                url = kernel.paths[dir]+url.substr(url.indexOf('/'),url.length);
+            }
+
             //3.  处理text!  css! 等资源
             var plugin
             url = url.replace(/^\w+!/, function(a) {
