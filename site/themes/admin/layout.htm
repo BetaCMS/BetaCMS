@@ -17,7 +17,7 @@
 </head>
 <body class="overflow-hidden" ms-controller="application">
 <!-- Overlay Div -->
-<div id="overlay" ms-controller="overlay" ms-visible="visible">
+<div id="overlay">
     <div class="overlay-inner">
         <div id="followingBallsG">
             <div id="followingBallsG_1" class="followingBallsG">
@@ -536,10 +536,7 @@
         state: 2
     };
 
-    require('js/common', function () {
-        avalon.log('加载jq了啊……')
-
-    });
+    require('js/main');
 
 </script>
 
