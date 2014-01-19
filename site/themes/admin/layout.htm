@@ -527,10 +527,11 @@
 <script type="text/javascript">
     avalon.config({loader: false});
     requirejs.config({
-        baseUrl: '{{@themes}}/asserts',
+        baseUrl: '{{@themes}}/asserts/lib',
         paths: {
-            jquery: 'lib/jquery-1.10.2.min',
-            store: 'lib/store'
+            js: '../js',
+            jquery: 'jquery-1.10.2.min',
+            store: 'store'
         }
     });
     require(['js/app']);

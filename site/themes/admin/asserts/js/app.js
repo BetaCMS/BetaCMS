@@ -1,32 +1,39 @@
-define(['jquery', 'store'], function ($, store) {
-    $(function	()	{
+define(function (require, exports, module) {
+    var $ = require("jquery"), store = require("store");
+
+    avalon.ready(function () {
+        var app = avalon.define("application", function (vm) {
+        });
+
+        avalon.scan()
+    });
+
+    $(function () {
         $('#overlay').fadeOut(800);
 
-        $('body').removeAttr('class');
+        $('body,#wrapper').removeAttr('class');
         $('body').removeAttr('style');
 
-        //Enable animation
-        $('#wrapper').removeAttr('class');
 
-        $('#sizeToggle').click(function()	{
+        $('#sizeToggle').click(function () {
             $('#wrapper').toggleClass('sidebar-mini');
         });
 
         //Toggle Menu
-        $('#sidebarToggle').click(function()	{
+        $('#sidebarToggle').click(function () {
             $('#wrapper').toggleClass('sidebar-display');
         });
 
 
-        if($.type(store.get('skin_color')) != 'undefined')	{
+        if ($.type(store.get('skin_color')) != 'undefined') {
 
             $('aside').removeClass('skin-1 skin-2 skin-3 skin-4');
             $('#top-nav').removeClass('skin-1 skin-2 skin-3 skin-4');
 
-            $('aside').addClass($.cookie('skin_color'));
-            $('#top-nav').addClass($.cookie('skin_color'));
+            $('aside').addClass(store.get('skin_color'));
+            $('#top-nav').addClass(store.get('skin_color'));
         }
-        else	{
+        else {
             $('aside').removeClass('skin-1 skin-2 skin-3 skin-4');
             $('#top-nav').removeClass('skin-1 skin-2 skin-3 skin-4');
 
@@ -36,8 +43,8 @@ define(['jquery', 'store'], function ($, store) {
 
 
         //Skin color
-        $('.theme-color').click(function()	{
-            store.set('skin_color',$(this).attr('id'));
+        $('.theme-color').click(function () {
+            store.set('skin_color', $(this).attr('id'));
 
             $('aside').removeClass('skin-1 skin-2 skin-3 skin-4');
             $('#top-nav').removeClass('skin-1 skin-2 skin-3 skin-4');
@@ -47,11 +54,11 @@ define(['jquery', 'store'], function ($, store) {
         });
 
         //theme setting
-        $("#theme-setting-icon").click(function()	{
-            if($('#theme-setting').hasClass('open'))	{
+        $("#theme-setting-icon").click(function () {
+            if ($('#theme-setting').hasClass('open')) {
                 $('#theme-setting,#theme-setting-icon').removeClass('open');
             }
-            else	{
+            else {
                 $('#theme-setting,#theme-setting-icon').addClass('open');
             }
 
@@ -59,26 +66,27 @@ define(['jquery', 'store'], function ($, store) {
         });
 
         //scroll to top of the page
-        $("#scroll-to-top").click(function()	{
+        $("#scroll-to-top").click(function () {
             $("html, body").animate({ scrollTop: 0 }, 600);
             return false;
         });
 
-        $(window).scroll(function(){
+        $(window).scroll(function () {
 
             var position = $(window).scrollTop();
 
             //Display a scroll to top button
-            if(position >= 200)	{
-                $('#scroll-to-top').attr('style','bottom:8px;');
+            if (position >= 200) {
+                $('#scroll-to-top').attr('style', 'bottom:8px;');
             }
-            else	{
+            else {
                 $('#scroll-to-top').removeAttr('style');
             }
         });
     });
+});
 
-})
+
 
 
 
