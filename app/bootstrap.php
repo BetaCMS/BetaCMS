@@ -102,7 +102,7 @@ $app->route('GET /', 'Index->index');
 
 $app->route(
     array(
-        'GET /admin',
+        //'GET /admin',
         'GET /*/admin'
     ),
     'admin\index->index'

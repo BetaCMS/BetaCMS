@@ -38,10 +38,9 @@ abstract class Controller extends \Prefab
         if (!empty($url) && preg_match('/\/admin\/?/', $url[0])) {
             $this->app->set('theme', 'admin');
         }
-        $theme = trim($app->get('theme'), '/');
-        $themes = "{$app->get('site')}/themes/$theme";
-        $app->set('themes', $themes);
-        $app->set('UI', "{$app->get('BASE')}/$themes/");
+        $themes = "{$app->get('site')}/themes/" . trim($app->get('theme'), '/');
+        $app->set('themes', "{$app->get('BASE')}/$themes");
+        $app->set('UI', ROOT . "/$themes/");
     }
 
 
