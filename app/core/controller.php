@@ -36,7 +36,13 @@ abstract class Controller extends \Prefab
     function beforeroute($app, $url)
     {
         if (!empty($url) && preg_match('/\/admin\/?/', $url[0])) {
-            $this->app->set('theme', 'admin');
+            $app->set('theme', 'admin');
+        }
+        //根据url获取使用的语言
+        if ($lan = strtolower(preg_replace('/^\/([a-zA-Z]*)\/?.*/', '${1}', $url[0]))) {
+            if (!stripos($app->get('LANGUAGE'), $lan) === false) {
+                $app->set('FALLBACK', $lan);
+            }
         }
         $themes = "{$app->get('site')}/themes/" . trim($app->get('theme'), '/');
         $app->set('themes', "{$app->get('BASE')}/$themes");
