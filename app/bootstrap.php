@@ -100,13 +100,10 @@ if (!$app->exists('SESSION.notifications')) {
 //$app->config('config/routes.ini');
 $app->route('GET /', 'Index->index');
 
-$app->route(
-    array(
-        //'GET /admin',
-        'GET /*admin'
-    ),
-    'admin\index->index'
-);
+$app->route('GET /*admin', 'admin\index->index');
+$app->route('GET /*admin/@action', 'admin\@action->index');
+$app->route('GET /*admin/@controller/@action', 'admin\@controller->index');
+
 
 // object mode
 /*$app->route('GET /admin', 'admin\index->index');
