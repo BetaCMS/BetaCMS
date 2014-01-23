@@ -98,11 +98,16 @@ if (!$app->exists('SESSION.notifications')) {
 // @see http://fatfreeframework.com/routing-engine
 // firstly load routes from ini file
 //$app->config('config/routes.ini');
-$app->route('GET /', 'Index->index');
+$app->route('GET /', 'index->index');
+$app->route('GET /*/@controller', '@controller->index');
+$app->route('GET /*/@controller/@action', '@controller->@action');
 
-$app->route('GET /*admin', 'admin\index->index');
-$app->route('GET /*admin/@action', 'admin\@action->index');
-$app->route('GET /*admin/@controller/@action', 'admin\@controller->index');
+
+/*admin*/
+$app->route('GET /*admin', 'admin\dashboard->index');
+$app->route('GET /*admin/@controller', 'admin\@controller->index');
+$app->route('GET|POST /*admin/@controller/@action', 'admin\@controller->action');
+$app->route('GET|POST /*admin/@controller/@action/@slug', 'admin\@controller->action');
 
 
 // object mode

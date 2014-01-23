@@ -4,7 +4,7 @@ namespace admin;
  * Index Controller Class
  */
 
-class Index extends \Controller
+class Dashboard extends \Controller
 {
 
     public function __construct()
@@ -14,6 +14,7 @@ class Index extends \Controller
 
     public function index($app, $params)
     {
+
         //echo $this->render('index.htm');
     }
 }
