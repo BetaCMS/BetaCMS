@@ -12,7 +12,7 @@ if (file_exists('config/config.ini'))
 
 // setup class autoloader
 // @see http://fatfreeframework.com/quick-reference#autoload
-$app->set('AUTOLOAD', 'controllers/|models/|core/');
+$app->set('AUTOLOAD', __dir__ . '/|controllers/|models/|core/');
 
 //创建用户文件夹
 if (!$site = trim($app->get('site'), '/')) {
@@ -24,20 +24,29 @@ if (!$site = trim($app->get('site'), '/')) {
     $app->set('site', trim($app->get('site'), '/'));
 }
 
+if (!$admin = $app->get('admin')) {
+    $admin = 'admin';
+    $app->set('admin', $admin);
+}
+
+$themes = "{$app->get('site')}/themes/" . trim($app->get('theme'), '/');
+$app->set('themes', "{$app->get('BASE')}/$themes");
+$app->set('UI', ROOT . "/$themes/");
+
 $app->set('TEMP', "../$site/{$app->get('TEMP')}");
 
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
 // default error pages if site is not being debugged
-if (PHP_SAPI !== 'cli' && empty($debug)) {
+if (true || PHP_SAPI !== 'cli' && empty($debug)) {
     $app->set('ONERROR',
         function () use ($app) {
             header('Expires:  ' . \helpers\time::http(time() + $app->get('error.ttl')));
+            $template = 'error/500.html';
             if ($app->get('ERROR.code') == '404') {
-                echo '404';
-            } else {
-                echo 'error';
+                $template = 'error/404.html';
             }
+            echo \Template::instance()->render($template);
         }
     );
 }
@@ -104,10 +113,10 @@ $app->route('GET /*/@controller/@action', '@controller->@action');
 
 
 /*admin*/
-$app->route('GET /*admin', 'admin\dashboard->index');
-$app->route('GET /*admin/@controller', 'admin\@controller->index');
-$app->route('GET|POST /*admin/@controller/@action', 'admin\@controller->action');
-$app->route('GET|POST /*admin/@controller/@action/@slug', 'admin\@controller->action');
+$app->route('GET /*' . $admin, 'admin\dashboard->index');
+$app->route('GET /*' . $admin . '/@controller', 'admin\@controller->index');
+$app->route('GET|POST /*' . $admin . '/@controller/@action', 'admin\@controller->action');
+$app->route('GET|POST /*' . $admin . '/@controller/@action/@slug', 'admin\@controller->action');
 
 
 // object mode

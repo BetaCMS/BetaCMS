@@ -37,6 +37,9 @@ abstract class Controller extends \Prefab
     {
         if (!empty($url) && preg_match('/\/admin\/?/', $url[0])) {
             $app->set('theme', 'admin');
+            $themes = "{$app->get('site')}/themes/" . trim($app->get('theme'), '/');
+            $app->set('themes', "{$app->get('BASE')}/$themes");
+            $app->set('UI', ROOT . "/$themes/");
         }
         //根据url获取使用的语言
         if ($lan = strtolower(preg_replace('/^\/([a-zA-Z]*)\/?.*/', '${1}', $url[0]))) {
@@ -44,9 +47,6 @@ abstract class Controller extends \Prefab
                 $app->set('FALLBACK', $lan);
             }
         }
-        $themes = "{$app->get('site')}/themes/" . trim($app->get('theme'), '/');
-        $app->set('themes', "{$app->get('BASE')}/$themes");
-        $app->set('UI', ROOT . "/$themes/");
     }
 
 
