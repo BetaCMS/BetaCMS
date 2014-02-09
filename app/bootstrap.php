@@ -38,12 +38,13 @@ $app->set('TEMP', "../$site/{$app->get('TEMP')}");
 // custom error handler if debugging
 $debug = $app->get('DEBUG');
 // default error pages if site is not being debugged
-if (true || PHP_SAPI !== 'cli' && empty($debug)) {
+if (true||PHP_SAPI !== 'cli' && empty($debug)) {
     $app->set('ONERROR',
         function () use ($app) {
             header('Expires:  ' . \helpers\time::http(time() + $app->get('error.ttl')));
             $template = 'error/500.html';
             if ($app->get('ERROR.code') == '404') {
+                $app->status(200);
                 $template = 'error/404.html';
             }
             echo \Template::instance()->render($template);

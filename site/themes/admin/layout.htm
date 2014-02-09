@@ -14,6 +14,45 @@
     <script src="{{@themes}}/asserts/lib/html5shiv.js"></script>
     <script src="{{@themes}}/asserts/lib/respond.min.js"></script>
     <![endif]-->
+    <script src="{{@themes}}/asserts/lib/jquery-1.10.2.min.js"></script>
+    <script src="{{@themes}}/asserts/lib/bootstrap.min.js"></script>
+    <script src="{{@themes}}/asserts/avalon.js"></script>
+    <script type="text/javascript">
+        var ctx = '{{@BASE}}/admin';
+        require.config({
+            paths: {
+                jquery: 'lib/jquery-1.10.2.min',
+                mmRouter: 'lib/mmRouter',
+                mmHistory: 'lib/mmHistory',
+                store: 'lib/store'
+            }
+        });
+        require("mmRouter", function () {
+            var model = avalon.define('application', function (vm) {
+                vm.cPath = '';
+            });
+            avalon.router.get("/", function (arg) {
+                if (model.cPath != '')
+                    model.cPath = ctx;
+            });
+            avalon.router.get("/c(/:controller)(/:action)", function () {
+                model.cPath = ctx + this.path.replace('/c', '');
+            });
+
+
+            avalon.history.start({
+                basepath: ctx,
+                html5Mode: false
+            });
+            avalon.scan()
+        });
+        $(function () {
+            $('#overlay').fadeOut(800);
+        });
+
+
+        //require("js/app");
+    </script>
 </head>
 <body class="overflow-hidden" ms-controller="application">
 <!-- Overlay Div -->
@@ -263,248 +302,111 @@
 <!-- /top-nav-->
 
 <aside class="skin-2 fixed">
-<div class="brand">
-    <span>BetaCMS</span>
-    <span class="text-toggle"> Admin</span>
-</div>
-<!-- /brand -->
-<div class="sidebar-inner">
-<div class="size-toggle">
-    <a class="btn btn-sm" id="sizeToggle">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </a>
-    <a class="btn btn-sm pull-right" href="login.html">
-        <i class="fa fa-power-off"></i>
-    </a>
-</div>
-<!-- /size-toggle -->
-<div class="user-block clearfix">
-    <img src="{{@themes}}/asserts/img/user.jpg" alt="User Avatar">
-
-    <div class="detail">
-        <strong>Hizhengfu</strong><span class="badge badge-danger bounceIn animation-delay4 m-left-xs">4</span>
-        <ul class="list-inline">
-            <li><a href="profile.html">Profile</a></li>
-            <li><a href="inbox.html" class="no-margin">Inbox</a></li>
-        </ul>
+    <div class="brand">
+        <span>BetaCMS</span>
+        <span class="text-toggle"> Admin</span>
     </div>
-</div>
-<!-- /user-block -->
-<div class="search-block">
-    <div class="input-group">
-        <input type="text" class="form-control input-sm" placeholder="search here...">
+    <!-- /brand -->
+    <div class="sidebar-inner">
+        <div class="size-toggle">
+            <a class="btn btn-sm" id="sizeToggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="btn btn-sm pull-right" href="login.html">
+                <i class="fa fa-power-off"></i>
+            </a>
+        </div>
+        <!-- /size-toggle -->
+        <div class="user-block clearfix">
+            <img src="{{@themes}}/asserts/img/user.jpg" alt="User Avatar">
+
+            <div class="detail">
+                <strong>Hizhengfu</strong><span class="badge badge-danger bounceIn animation-delay4 m-left-xs">4</span>
+                <ul class="list-inline">
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="inbox.html" class="no-margin">Inbox</a></li>
+                </ul>
+            </div>
+        </div>
+        <!-- /user-block -->
+        <div class="search-block">
+            <div class="input-group">
+                <input type="text" class="form-control input-sm" placeholder="search here...">
 						<span class="input-group-btn">
 							<button class="btn btn-default btn-sm" type="button"><i class="fa fa-search"></i></button>
 						</span>
-    </div>
-    <!-- /input-group -->
-</div>
-<!-- /search-block -->
-<div class="main-menu">
-    <ul>
-        <li>
-            <a href="{{@admin}}">
+            </div>
+            <!-- /input-group -->
+        </div>
+        <!-- /search-block -->
+        <div class="main-menu">
+            <ul>
+                <li class="active">
+                    <a href="{{@admin}}">
 								<span class="menu-icon">
 									<i class="fa fa-desktop fa-lg"></i>
 								</span>
 								<span class="text">
 									Dashboard
 								</span>
-                <span class="menu-hover"></span>
-            </a>
-        </li>
-        <li class="active">
-            <a href="#">
+                        <span class="menu-hover"></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 								<span class="menu-icon">
 									<i class="fa fa-file-text fa-lg"></i>
 								</span>
 								<span class="text">
 									Page
 								</span>
-                <span class="menu-hover"></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="login.html">
-                        Sign in
+                        <span class="menu-hover"></span>
                     </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="login.html">
+                                Sign in
+                            </a>
+                        </li>
+                        <li>
+                            <a href="register.html">
+                                Sign up
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
-                    <a href="register.html">
-                        Sign up
-                    </a>
-                </li>
-                <li>
-                    <a href="profile.html">
-                        Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="blog.html">
-                        Blog
-                    </a>
-                </li>
-                <li>
-                    <a href="single_post.html">
-                        Single Post
-                    </a>
-                </li>
-                <li>
-                    <a href="landing.html">
-                        Landing
-                    </a>
-                </li>
-                <li>
-                    <a href="search_result.html">
-                        Search Result
-                    </a>
-                </li>
-                <li>
-                    <a href="pricing.html">
-                        Priciing table
-                    </a>
-                </li>
-                <li>
-                    <a href="invoice.html">
-                        Invoice
-                    </a>
-                </li>
-                <li>
-                    <a href="faq.html">
-                        FAQ
-                    </a>
-                </li>
-                <li>
-                    <a href="error404.html">
-                        Error 404
-                    </a>
-                </li>
-                <li>
-                    <a href="error500.html">
-                        Error 500
-                    </a>
-                </li>
-                <li>
-                    <a href="blank.html">
-                        Blank
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 								<span class="menu-icon">
 									<i class="fa fa-tag fa-lg"></i>
 								</span>
 								<span class="text">
-									Component
+									Settings
 								</span>
-                <span class="badge badge-success bounceIn animation-delay5">9</span>
-                <span class="menu-hover"></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="ui_element.html">
-                        UI Features
+                        <span class="menu-hover"></span>
                     </a>
-                </li>
-                <li>
-                    <a href="button.html">
-                        Button & Icons
-                    </a>
-                </li>
-                <li>
-                    <a href="tab.html">
-                        Tab
-                    </a>
-                </li>
-                <li>
-                    <a href="nestable_list.html">
-                        Nestable List
-                    </a>
-                </li>
-                <li>
-                    <a href="calendar.html">
-                        Calendar
-                    </a>
-                </li>
-                <li>
-                    <a href="table.html">
-                        Table
-                    </a>
-                </li>
-                <li>
-                    <a href="widget.html">
-                        Widget
-                    </a>
-                </li>
-                <li>
-                    <a href="form_element.html">
-                        Form Element
-                    </a>
-                </li>
-                <li>
-                    <a href="form_wizard.html">
-                        Form Wizard
-                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#/c/options/general">
+                                General
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#/c/options">
+                                Options
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
-        </li>
-
-        <li>
-            <a href="timeline.html">
-								<span class="menu-icon">
-									<i class="fa fa-clock-o fa-lg"></i>
-								</span>
-								<span class="text">
-									Timeline
-								</span>
-                <span class="menu-hover"></span>
-            </a>
-        </li>
-        <li>
-            <a href="gallery.html">
-								<span class="menu-icon">
-									<i class="fa fa-picture-o fa-lg"></i>
-								</span>
-								<span class="text">
-									Gallery
-								</span>
-                <span class="menu-hover"></span>
-            </a>
-        </li>
-        <li>
-            <a href="inbox.html">
-								<span class="menu-icon">
-									<i class="fa fa-envelope fa-lg"></i>
-								</span>
-								<span class="text">
-									Inbox
-								</span>
-                <span class="badge badge-danger bounceIn animation-delay6">4</span>
-                <span class="menu-hover"></span>
-            </a>
-        </li>
-        <li>
-            <a href="contact.html">
-								<span class="menu-icon">
-									<i class="fa fa-phone fa-lg"></i>
-								</span>
-								<span class="text">
-									Contact
-								</span>
-                <span class="menu-hover"></span>
-            </a>
-        </li>
-    </ul>
 
 
-</div>
-<!-- /main-menu -->
-</div>
-<!-- /sidebar-inner -->
+        </div>
+        <!-- /main-menu -->
+    </div>
+    <!-- /sidebar-inner -->
 </aside>
 
 <div id="main-container">
@@ -515,32 +417,14 @@
         </ul>
     </div>
     <!-- breadcrumb -->
-    <check if="{{ isset(@template) }}">
-        <include href="{{ @template }}" />
-    </check>
+    <div class="content" ms-include-src="cPath">
+        <include if="{{ isset(@template) }}" href="{{ @template }}"/>
+    </div>
 </div>
 <!-- /main-container -->
 </div>
 <!-- /wrapper -->
 
 <a href="" id="scroll-to-top" class="hidden-print"><i class="fa fa-chevron-up"></i></a>
-
-<script src="{{@themes}}/asserts/lib/jquery-1.10.2.min.js"></script>
-<script src="{{@themes}}/asserts/lib/bootstrap.min.js"></script>
-<script src="{{@themes}}/asserts/lib/require.js"></script>
-<script src="{{@themes}}/asserts/lib/avalon.js"></script>
-<script type="text/javascript">
-    avalon.config({loader: false});
-    requirejs.config({
-        baseUrl: '{{@themes}}/asserts/lib',
-        paths: {
-            js: '../js',
-            jquery: 'jquery-1.10.2.min',
-            store: 'store'
-        }
-    });
-    require(['js/app']);
-</script>
-
 </body>
 </html>

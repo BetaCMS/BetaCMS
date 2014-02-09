@@ -1,9 +1,9 @@
 <?php
+
 /**
  * Base Controller Class
  *
  */
-
 abstract class Controller extends \Prefab
 {
 
@@ -49,19 +49,21 @@ abstract class Controller extends \Prefab
         }
     }
 
-
     function afterroute($app, $url)
     {
+        $suffix = $app->exists('suffix') ? $app->get('suffix') : 'htm';
         /*后端模板逻辑*/
         if (!empty($url) && preg_match('/\/admin\/?/', $url[0])) {
+            if ($template = $app->get('template'))
+                $app->set('template', "$template.$suffix");
             if ($app->get('AJAX')) {
                 if ($template = $app->get('template'))
                     echo Template::instance()->render($template);
             } else {
-                echo Template::instance()->render('layout.htm');
+                echo Template::instance()->render('layout.' . $suffix);
             }
         } else {
-            echo Template::instance()->render('index.htm');
+            echo Template::instance()->render('index.' . $suffix);
         }
     }
 }

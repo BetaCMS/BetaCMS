@@ -37,6 +37,10 @@ class Options extends Model
 
     public function index()
     {
+        $options=$this->mapper($this->table);
+        $options['option_name']='siteurl';
+        $options['option_value']='www.google.com';
+        $options->save();
 
 
     }

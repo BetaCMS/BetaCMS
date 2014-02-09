@@ -4,7 +4,7 @@ namespace admin;
  * Index Controller Class
  */
 
-class Dashboard extends \Controller
+class Options extends \Controller
 {
 
     public function __construct()
@@ -15,7 +15,7 @@ class Dashboard extends \Controller
     public function index($app, $params)
     {
         //\Options::instance()->index();
-        $app->set('template','dashboard');
+        $app->set('template','general');
 
         //echo $this->render('index.htm');
     }
