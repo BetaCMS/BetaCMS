@@ -24,12 +24,16 @@
                 jquery: 'lib/jquery-1.10.2.min',
                 mmRouter: 'lib/mmRouter',
                 mmHistory: 'lib/mmHistory',
+                nprogress: 'lib/nprogress',
                 store: 'lib/store'
             }
         });
-        require("mmRouter", function () {
+        require('mmRouter', function (nprogress) {
             var model = avalon.define('application', function (vm) {
                 vm.cPath = '';
+                vm.rendered = function () {
+                    console.log('rendered')
+                }
             });
             avalon.router.get("/", function (arg) {
                 if (model.cPath != '')
@@ -55,21 +59,7 @@
     </script>
 </head>
 <body class="overflow-hidden" ms-controller="application">
-<!-- Overlay Div -->
-<div id="overlay">
-    <div class="overlay-inner">
-        <div id="followingBallsG">
-            <div id="followingBallsG_1" class="followingBallsG">
-            </div>
-            <div id="followingBallsG_2" class="followingBallsG">
-            </div>
-            <div id="followingBallsG_3" class="followingBallsG">
-            </div>
-            <div id="followingBallsG_4" class="followingBallsG">
-            </div>
-        </div>
-    </div>
-</div>
+<div id="overlay" class="transparent"></div>
 
 <a href="" id="theme-setting-icon"><i class="fa fa-cog fa-lg"></i></a>
 
@@ -417,7 +407,7 @@
         </ul>
     </div>
     <!-- breadcrumb -->
-    <div class="content" ms-include-src="cPath">
+    <div class="content" ms-include-src="cPath" data-include-rendered="rendered">
         <include if="{{ isset(@template) }}" href="{{ @template }}"/>
     </div>
 </div>
